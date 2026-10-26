@@ -279,7 +279,6 @@ export async function getCategoryWithFurniture(
         .single();
 
       if (!category) return null;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const cat = category as Record<string, any>;
 
       let query = supabase

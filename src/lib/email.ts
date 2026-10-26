@@ -9,8 +9,9 @@ export async function sendPasswordResetEmail(toEmail: string, resetUrl: string) 
   }
 
   const resend = new Resend(resendKey);
+  const from = process.env.EMAIL_FROM ?? "CH Furniture House <onboarding@resend.dev>";
   const { error } = await resend.emails.send({
-    from: "CH Furniture House <onboarding@resend.dev>",
+    from,
     to: toEmail,
     subject: "Reset your admin password — CH Furniture House",
     html: `

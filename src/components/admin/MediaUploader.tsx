@@ -17,15 +17,22 @@ type FileState = {
   previewUrl?: string;
 };
 
-const CLOUD = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-const PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
+type UploadSignature = {
+  timestamp: number;
+  signature: string;
+  apiKey: string;
+  cloudName: string;
+  folder: string;
+  allowedFormats: string;
+  maxBytes: number;
+};
+
 const MAX_UNCOMPRESSED_IMAGE_BYTES = 300 * 1024;
 
 async function prepareUploadFile(file: File): Promise<File> {
   if (!file.type.startsWith("image/") || file.size <= MAX_UNCOMPRESSED_IMAGE_BYTES) {
     return file;
   }
-
   return imageCompression(file, {
     maxSizeMB: 0.3,
     maxWidthOrHeight: 1280,
@@ -33,18 +40,27 @@ async function prepareUploadFile(file: File): Promise<File> {
   });
 }
 
+async function fetchUploadSignature(): Promise<UploadSignature> {
+  const res = await fetch("/api/cloudinary/sign", { method: "POST" });
+  if (!res.ok) throw new Error("Could not get upload signature — are you still logged in?");
+  return res.json();
+}
+
 async function uploadToCloudinary(
   file: File,
   onProgress: (pct: number) => void
 ): Promise<UploadedMedia> {
-  const isVideo = file.type.startsWith("video/");
-  // Use "auto" so Cloudinary accepts both images and videos with one preset
-  const url = `https://api.cloudinary.com/v1_1/${CLOUD}/auto/upload`;
+  const sig = await fetchUploadSignature();
+  const url = `https://api.cloudinary.com/v1_1/${sig.cloudName}/auto/upload`;
 
   const fd = new FormData();
   fd.append("file", file);
-  fd.append("upload_preset", PRESET);
-  fd.append("folder", "ch-furniture");
+  fd.append("api_key", sig.apiKey);
+  fd.append("timestamp", String(sig.timestamp));
+  fd.append("signature", sig.signature);
+  fd.append("folder", sig.folder);
+  fd.append("allowed_formats", sig.allowedFormats);
+  fd.append("max_bytes", String(sig.maxBytes));
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
