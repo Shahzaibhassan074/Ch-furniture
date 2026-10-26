@@ -5,7 +5,6 @@ import { SiteShell } from "@/components/site/SiteShell";
 const HeroSlider = dynamic(
   () => import("@/components/site/home/HeroSlider").then((m) => ({ default: m.HeroSlider })),
   {
-    ssr: false,
     loading: () => (
       <div className="h-screen bg-stone pt-[96px]">
         <div className="h-10 bg-terra" />

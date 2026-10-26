@@ -36,7 +36,9 @@ const bigNumVariants = {
 export function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [paused,  setPaused]  = useState(false);
-  const touchX = useRef(0);
+  const touchX   = useRef(0);
+  const didMount = useRef(false);
+  useEffect(() => { didMount.current = true; }, []);
 
   const goTo = useCallback((i: number) => {
     setCurrent(((i % SLIDES.length) + SLIDES.length) % SLIDES.length);
@@ -91,7 +93,7 @@ export function HeroSlider() {
           <motion.div
             key={`bg-${current}`}
             variants={imgVariants}
-            initial="enter"
+            initial={!didMount.current && current === 0 ? "center" : "enter"}
             animate="center"
             exit="exit"
             className="absolute inset-0"

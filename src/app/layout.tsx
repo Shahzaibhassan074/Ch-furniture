@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter, Poppins } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { getSettings } from "@/lib/settings";
 import "./globals.css";
@@ -18,12 +18,6 @@ const sans = Inter({
   display: "swap",
 });
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-poppins",
-  display: "swap",
-});
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 const SITE_NAME = "CH Furniture House";
@@ -144,7 +138,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const jsonLd = [localBizLd, websiteLd];
 
   return (
-    <html lang="en" className={`${jakarta.variable} ${sans.variable} ${poppins.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${jakarta.variable} ${sans.variable}`} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />

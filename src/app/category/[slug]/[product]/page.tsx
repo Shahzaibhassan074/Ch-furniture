@@ -63,7 +63,7 @@ export default async function ProductPage({ params }: { params: Params }) {
 
   const features = Array.isArray(item.features) ? item.features : parseList(item.features as unknown as string);
   const media = [
-    ...item.images.map((i) => ({ type: "image" as const, url: i.url, alt: i.alt ?? item.name })),
+    ...item.images.map((i) => ({ type: "image" as const, url: i.url, alt: i.alt ?? `${item.name} by CH Furniture House` })),
     ...item.videos.map((v) => ({ type: "video" as const, url: v.url, poster: v.posterUrl ?? undefined })),
   ];
 

@@ -23,10 +23,11 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const cat = await prisma.category.findUnique({ where: { slug: params.slug } });
   if (!cat) return { title: "Collection" };
   const rawCatTitle = cat.metaTitle?.replace(/\s*\|\s*(Chaudhry Furniture House|CH Furniture House)\s*$/i, "").trim();
-  const title = rawCatTitle || cat.name;
-  const description =
-    cat.metaDescription ||
-    `Browse our ${cat.name} collection — premium handcrafted wooden furniture by CH Furniture House, Sialkot, Pakistan. Custom sizes, finishes and wood types available.`;
+  const title = rawCatTitle || `${cat.name} in Pakistan`;
+  const descFallback = cat.description
+    ? `${cat.description.slice(0, 120).trim()} — handcrafted in Sialkot, Pakistan. Custom sizes, finishes and wood types available.`
+    : `Browse our ${cat.name} collection — premium handcrafted wooden furniture by CH Furniture House, Sialkot. Custom sizes, finishes and wood types available.`;
+  const description = cat.metaDescription || descFallback;
   const url   = `${SITE}/category/${cat.slug}`;
   const image = cat.bannerUrl || cat.thumbUrl || `${SITE}/opengraph-image`;
   return {

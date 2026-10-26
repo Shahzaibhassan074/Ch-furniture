@@ -23,7 +23,7 @@ export function MarqueeStrip() {
         <span
           style={{
             color: "#6B1E1E",
-            fontFamily: "var(--font-poppins, 'Poppins', sans-serif)",
+            fontFamily: "var(--font-sans, 'Inter', sans-serif)",
             fontWeight: 600,
             fontSize: "clamp(13px, 1vw, 17px)",
             lineHeight: 1,
@@ -36,7 +36,7 @@ export function MarqueeStrip() {
           aria-hidden
           style={{
             color: "#6B1E1E",
-            fontFamily: "var(--font-poppins, 'Poppins', sans-serif)",
+            fontFamily: "var(--font-sans, 'Inter', sans-serif)",
             fontWeight: 600,
             fontSize: "clamp(13px, 1vw, 17px)",
             lineHeight: 1,

@@ -39,8 +39,6 @@ export function WorkshopVideo({
 
     let abandoned = false;
 
-    // Belt-and-suspenders mute: React's `muted` JSX prop only sets the DOM
-    // *property*; mobile browsers also check the HTML *attribute* for autoplay.
     const arm = () => {
       vid.muted = true;
       vid.setAttribute("muted", "");
@@ -52,29 +50,34 @@ export function WorkshopVideo({
       vid.play().catch(() => {});
     };
 
-    arm();
-    tryPlay();
-
-    // Retry whenever the browser has buffered enough data.
-    vid.addEventListener("canplay",        tryPlay);
-    vid.addEventListener("loadeddata",     tryPlay);
-    vid.addEventListener("loadedmetadata", tryPlay);
-
-    // One-shot fallbacks for browsers that require a user gesture first.
-    const once = { once: true, passive: true } as const;
-    const onGesture = () => tryPlay();
-    window.addEventListener("scroll",     onGesture, once);
-    window.addEventListener("touchstart", onGesture, once);
-    window.addEventListener("click",      onGesture, once);
+    // Only start loading/playing when video is near the viewport.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        arm();
+        // Trigger browser to start buffering then play.
+        vid.load();
+        tryPlay();
+        vid.addEventListener("canplay",        tryPlay);
+        vid.addEventListener("loadeddata",     tryPlay);
+        vid.addEventListener("loadedmetadata", tryPlay);
+        const once = { once: true, passive: true } as const;
+        const onGesture = () => tryPlay();
+        window.addEventListener("scroll",     onGesture, once);
+        window.addEventListener("touchstart", onGesture, once);
+        window.addEventListener("click",      onGesture, once);
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(vid);
 
     return () => {
       abandoned = true;
+      observer.disconnect();
       vid.removeEventListener("canplay",        tryPlay);
       vid.removeEventListener("loadeddata",     tryPlay);
       vid.removeEventListener("loadedmetadata", tryPlay);
-      window.removeEventListener("scroll",     onGesture);
-      window.removeEventListener("touchstart", onGesture);
-      window.removeEventListener("click",      onGesture);
     };
   }, [src]);
 
@@ -88,7 +91,7 @@ export function WorkshopVideo({
       muted
       loop
       playsInline
-      preload="auto"
+      preload="none"
       disablePictureInPicture
       aria-hidden="true"
       className="absolute inset-0 h-full w-full object-cover"
