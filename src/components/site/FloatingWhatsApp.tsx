@@ -13,7 +13,7 @@ export function FloatingWhatsApp({ number, message }: { number: string; message:
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 1, type: "spring", stiffness: 200, damping: 18 }}
-      className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center
+      className="fixed bottom-8 right-5 z-40 flex h-14 w-14 items-center justify-center
                  rounded-full bg-[#25D366] text-white shadow-[0_10px_40px_-8px_rgba(37,211,102,0.7)]
                  transition-transform hover:scale-110"
     >

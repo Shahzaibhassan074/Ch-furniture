@@ -1,13 +1,24 @@
 import type { MetadataRoute } from "next";
 import { getAllSlugs } from "@/lib/queries";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://ch-furniture.vercel.app";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
+
+const staticPriorities: Record<string, number> = {
+  "":           1.0,
+  "/categories": 0.9,
+  "/contact":    0.8,
+  "/about":      0.7,
+  "/search":     0.3,
+};
+
+// Captured once at cold-start (= deploy time) rather than on every request
+const BUILD_TIME = new Date();
 
 const staticRoutes = ["", "/about", "/categories", "/contact", "/search"].map((p) => ({
   url: `${SITE}${p}`,
-  lastModified: new Date(),
-  changeFrequency: "weekly" as const,
-  priority: p === "" ? 1 : 0.7,
+  lastModified: BUILD_TIME,
+  changeFrequency: p === "" || p === "/categories" ? ("daily" as const) : ("weekly" as const),
+  priority: staticPriorities[p] ?? 0.7,
 }));
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -26,14 +37,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${SITE}/category/${c.slug}`,
     lastModified: c.updatedAt,
     changeFrequency: "weekly" as const,
-    priority: 0.6,
+    priority: 0.8,
   }));
 
   const productRoutes = items.map((i: any) => ({
     url: `${SITE}/category/${i.category.slug}/${i.slug}`,
     lastModified: i.updatedAt,
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
   }));
 
   return [...staticRoutes, ...categoryRoutes, ...productRoutes];

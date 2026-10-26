@@ -1,13 +1,14 @@
 import { withAuth } from "next-auth/middleware";
 
-// Protect /admin/* but allow the login page itself.
+// Protect /admin/* but allow the public auth pages.
 export default withAuth({
   pages: { signIn: "/admin/login" },
 });
 
 export const config = {
   matcher: [
-    // All admin routes except the login page and NextAuth endpoints
-    "/admin/((?!login).*)",
+    // Bare /admin and all sub-routes except login, forgot-password, reset-password
+    "/admin",
+    "/admin/((?!login|forgot-password|reset-password).*)",
   ],
 };

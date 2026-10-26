@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
@@ -13,7 +14,7 @@ type Row = {
   published: boolean;
   featured: boolean;
   bestSeller: boolean;
-  category: { name: string };
+  category: { name: string } | null;
   images: { url: string; isPrimary: boolean }[];
 };
 
@@ -22,34 +23,51 @@ export function FurnitureList({ items }: { items: Row[] }) {
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-4xl text-linen">Furniture</h1>
-          <p className="mt-1 text-linenDim">{items.length} designs</p>
+          <p className="text-[11px] font-sans font-medium uppercase tracking-widest text-inkMuted">Catalog</p>
+          <h1 className="mt-1 font-display text-4xl font-bold text-ink">All Furniture</h1>
+          <p className="mt-1 text-sm text-inkMuted">{items.length} designs</p>
         </div>
-        <Link href="/admin/furniture/new" className="btn-brass"><Plus className="h-4 w-4" /> Add Design</Link>
+        <Link href="/admin/categories" className="btn-terra">
+          <Plus className="h-4 w-4" />
+          Add via Categories
+        </Link>
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-sm border border-walnut/50">
+      <div className="mt-8 overflow-hidden rounded-xl border border-inkBorder bg-white shadow-sm">
         {items.length === 0 ? (
-          <div className="bg-bark p-12 text-center text-linenDim">No designs yet. Add your first piece.</div>
+          <div className="p-16 text-center text-inkMuted">
+            No designs yet. Add your first piece through a Category.
+          </div>
         ) : (
           items.map((it) => {
             const img = it.images.find((i) => i.isPrimary)?.url ?? it.images[0]?.url;
             return (
-              <div key={it.id} className="flex items-center gap-4 border-b border-walnut/40 bg-bark p-3 last:border-0">
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-sm bg-walnut">
+              <div
+                key={it.id}
+                className="flex items-center gap-4 border-b border-inkBorder/60 p-3 last:border-0 hover:bg-stone/30 transition-colors"
+              >
+                <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-stone">
                   {img && <Image src={img} alt="" fill className="object-cover" />}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-linen">{it.name}</p>
-                  <p className="text-xs text-linenDim">{it.category.name} · /{it.slug}</p>
+                  <p className="truncate text-sm font-medium text-ink">{it.name}</p>
+                  <p className="text-xs text-inkMuted">{it.category?.name ?? "—"} · /{it.slug}</p>
                 </div>
                 <div className="hidden items-center gap-2 sm:flex">
-                  {it.featured && <span title="Featured"><Star className="h-4 w-4 fill-brass text-brass" /></span>}
-                  {it.bestSeller && <span className="rounded-full bg-brass/15 px-2 py-0.5 text-[10px] uppercase tracking-wider text-brass">Best</span>}
-                  {!it.published && <span title="Hidden"><EyeOff className="h-4 w-4 text-linenDim" /></span>}
+                  {it.featured && <Star className="h-3.5 w-3.5 fill-terra text-terra" />}
+                  {it.bestSeller && (
+                    <span className="rounded-full bg-blush px-2 py-0.5 text-[10px] font-sans font-medium uppercase tracking-wider text-terra">
+                      Best
+                    </span>
+                  )}
+                  {!it.published && <EyeOff className="h-3.5 w-3.5 text-inkMuted" />}
                 </div>
-                <Link href={`/admin/furniture/${it.id}`} className="flex items-center gap-1.5 rounded-sm border border-walnut/60 px-3 py-2 text-xs text-linenDim hover:text-linen">
-                  <Pencil className="h-3.5 w-3.5" /> Edit
+                <Link
+                  href={`/admin/furniture/${it.id}`}
+                  className="flex items-center gap-1.5 rounded-lg border border-inkBorder px-3 py-1.5 text-xs font-medium text-inkMuted transition-colors hover:border-terra/40 hover:text-terra"
+                >
+                  <Pencil className="h-3 w-3" />
+                  Edit
                 </Link>
                 <DeleteBtn id={it.id} name={it.name} />
               </div>
@@ -65,11 +83,19 @@ function DeleteBtn({ id, name }: { id: string; name: string }) {
   const [confirm, setConfirm] = useState(false);
   return confirm ? (
     <button
-      onClick={async () => { try { await deleteFurniture(id); toast.success(`Deleted ${name}`); } catch { toast.error("Delete failed"); } }}
-      className="rounded-sm border border-red-500/50 px-3 py-2 text-xs text-red-400"
-    >Confirm?</button>
+      onClick={async () => {
+        try { await deleteFurniture(id); toast.success(`Deleted ${name}`); }
+        catch { toast.error("Delete failed"); }
+      }}
+      className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600"
+    >
+      Confirm?
+    </button>
   ) : (
-    <button onClick={() => setConfirm(true)} aria-label="Delete" className="rounded-sm border border-walnut/60 px-3 py-2 text-linenDim hover:text-red-400">
+    <button
+      onClick={() => setConfirm(true)}
+      className="rounded-lg border border-inkBorder p-1.5 text-inkMuted transition-colors hover:border-red-200 hover:text-red-500"
+    >
       <Trash2 className="h-3.5 w-3.5" />
     </button>
   );

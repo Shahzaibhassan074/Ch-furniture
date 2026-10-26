@@ -1,150 +1,166 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import dynamic from "next/dynamic";
+import { ArrowRight } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
-import { Hero } from "@/components/site/home/Hero";
+const HeroSlider = dynamic(
+  () => import("@/components/site/home/HeroSlider").then((m) => ({ default: m.HeroSlider })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-screen bg-stone pt-[96px]">
+        <div className="h-10 bg-terra" />
+      </div>
+    ),
+  }
+);
+
+const MarqueeStrip = dynamic(
+  () => import("@/components/site/home/MarqueeStrip").then((m) => ({ default: m.MarqueeStrip })),
+  { ssr: false }
+);
+import { FurnitureCardCompact } from "@/components/site/FurnitureCard";
+import { FeaturedScroller } from "@/components/site/FeaturedScroller";
 import { CategoryCard } from "@/components/site/CategoryCard";
-import { FurnitureCard } from "@/components/site/FurnitureCard";
 import {
   SectionHeading,
-  Stats,
-  WhyUs,
   Process,
   Testimonials,
   FAQ,
-  CTA,
+  WorkshopBanner,
 } from "@/components/site/home/Sections";
 import { Reveal } from "@/components/motion/Reveal";
 import {
-  getFeaturedCategories,
+  getAllCategories,
   getFeaturedFurniture,
   getTestimonials,
 } from "@/lib/queries";
 import { getSettings } from "@/lib/settings";
+import { withRetry } from "@/lib/prisma";
 
-// Revalidate periodically so admin edits show without a redeploy.
+const CircularCategoryShowcase = dynamic(
+  () =>
+    import("@/components/site/CircularCategoryShowcase").then(
+      (m) => ({ default: m.CircularCategoryShowcase }),
+    ),
+  { ssr: false },
+);
+
 export const revalidate = 60;
 
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
+
+const FAQ_LD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "@id": `${SITE}/#faq`,
+  mainEntity: [
+    { "@type": "Question", name: "Do you make fully custom furniture?",
+      acceptedAnswer: { "@type": "Answer", text: "Yes. Custom design is our specialty — share your dimensions, style and finish preferences and we build to order." } },
+    { "@type": "Question", name: "Which woods do you work with?",
+      acceptedAnswer: { "@type": "Answer", text: "We work with premium seasoned hardwoods including Sheesham (rosewood), walnut, teak and oak, plus quality engineered options where suitable." } },
+    { "@type": "Question", name: "Do you ship outside Sialkot or Pakistan?",
+      acceptedAnswer: { "@type": "Answer", text: "Yes, we serve clients across Pakistan and arrange export for international buyers. Message us on WhatsApp for delivery details." } },
+    { "@type": "Question", name: "How do I get a price quote?",
+      acceptedAnswer: { "@type": "Answer", text: "Browse the collections and tap the WhatsApp button on any design, or use the contact form. We'll reply with pricing, wood options and timelines." } },
+    { "@type": "Question", name: "How long does a piece take to make?",
+      acceptedAnswer: { "@type": "Answer", text: "Typically 4–8 weeks depending on complexity. We do not rush the finishing — every coat needs to cure properly." } },
+    { "@type": "Question", name: "Where is the workshop located?",
+      acceptedAnswer: { "@type": "Answer", text: "Our workshop is in Mohala Sardaaran, Near HBL Bank, Kalaswala, Pasrur, Sialkot, Punjab, Pakistan. WhatsApp us to arrange a visit." } },
+    { "@type": "Question", name: "What payment methods do you accept?",
+      acceptedAnswer: { "@type": "Answer", text: "We accept cash, bank transfer (EasyPaisa, JazzCash, and direct bank transfer). Full payment details are shared after order confirmation." } },
+  ],
+};
+
 export default async function HomePage() {
-  const [settings, categories, featured, testimonials] = await Promise.all([
-    getSettings(),
-    getFeaturedCategories(6),
-    getFeaturedFurniture(6),
-    getTestimonials(6),
-  ]);
+  const [settings, categories, featured, testimonials] = await withRetry(() =>
+    Promise.all([
+      getSettings(),
+      getAllCategories(),
+      getFeaturedFurniture(10),
+      getTestimonials(6),
+    ])
+  );
+
+  const totalPieces = categories.reduce((sum, c) => sum + (c.count ?? 0), 0);
 
   return (
     <SiteShell>
-      <Hero heroImage={settings.ogImageUrl || undefined} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }} />
 
-      {/* Introduction + stats */}
-      <section className="container-px py-24 md:py-32">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-20">
+      {/* ── Hero slider (H1 is the brand eyebrow inside HeroSlider) ── */}
+      <HeroSlider />
+      <MarqueeStrip />
+
+      {/* ── Catalogue — circular orbit showcase ── */}
+      <CircularCategoryShowcase categories={categories} totalPieces={totalPieces} />
+
+      {/* ── Featured pieces — horizontal scroll ── */}
+      {featured.length > 0 && (
+        <section className="container-px pb-20">
+          <div className="mb-8 flex items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow">Best Sellers</p>
+              <h2 className="mt-2 font-display text-[clamp(1.7rem,3.5vw,2.6rem)] font-bold text-ink">
+                Pieces worth the visit
+              </h2>
+            </div>
+            <Link
+              href="/categories"
+              className="hidden shrink-0 items-center gap-1.5 text-sm font-sans font-medium text-inkMuted hover:text-terra sm:flex"
+            >
+              See all <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <FeaturedScroller>
+            {featured.map((f, i) => (
+              <FurnitureCardCompact key={f.slug} item={f} index={i} />
+            ))}
+          </FeaturedScroller>
+        </section>
+      )}
+
+      {/* ── Process — why it takes time ── */}
+      <section className="container-px pb-20">
+        <Reveal>
+          <Process image={settings.processImageUrl || undefined} />
+        </Reveal>
+      </section>
+
+      {/* ── Testimonials ── */}
+      {testimonials.length > 0 && (
+        <section className="container-px pb-20">
           <Reveal>
             <SectionHeading
-              eyebrow="Who we are"
-              title="A Sialkot workshop devoted to fine wood."
+              eyebrow="Kind words"
+              title="Trusted by homes and businesses."
+              accentWord="businesses."
             />
           </Reveal>
-          <Reveal delay={0.1}>
-            <p className="text-lg leading-relaxed text-linenDim">
-              {settings.description ||
-                "CH FURNITURE is a premium furniture manufacturer based in Sialkot, Pakistan. We design and build high-quality custom wooden furniture for homes, offices, hotels and restaurants — combining traditional woodworking with modern design."}
-            </p>
-            <Link href="/about" className="mt-6 inline-flex items-center gap-2 text-sm uppercase tracking-wider text-brass hover:text-brassLight">
-              Our story <ArrowUpRight className="h-4 w-4" />
-            </Link>
-          </Reveal>
-        </div>
-
-        <div className="mt-16">
-          <Stats
-            years={settings.yearsExperience}
-            projects={settings.projectsCompleted}
-            clients={settings.happyClients}
-            craftsmen={settings.craftsmenCount}
-          />
-        </div>
-      </section>
-
-      <div className="container-px"><div className="hairline" /></div>
-
-      {/* Featured categories */}
-      <section className="container-px py-24 md:py-32">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <Reveal><SectionHeading eyebrow="Collections" title="Explore our craft by category." /></Reveal>
-          <Reveal delay={0.1}>
-            <Link href="/categories" className="btn-ghost">All Collections</Link>
-          </Reveal>
-        </div>
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((c, i) => (
-            <CategoryCard key={c.slug} category={c} index={i} />
-          ))}
-        </div>
-      </section>
-
-      {/* Best selling designs */}
-      {featured.length > 0 && (
-        <section className="bg-bark py-24 md:py-32">
-          <div className="container-px">
-            <Reveal>
-              <SectionHeading
-                eyebrow="Best sellers"
-                title="Signature designs our clients love."
-                align="center"
-              />
-            </Reveal>
-            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {featured.map((f, i) => (
-                <FurnitureCard key={f.slug} item={f} whatsapp={settings.whatsapp} index={i} />
-              ))}
-            </div>
+          <div className="mt-10">
+            <Testimonials items={testimonials as import("@/components/site/home/Sections").TestimonialData[]} />
           </div>
         </section>
       )}
 
-      {/* Why choose us */}
-      <section className="container-px py-24 md:py-32">
+      {/* ── FAQ ── */}
+      <section className="container-px pb-20">
         <Reveal>
-          <SectionHeading
-            eyebrow="Why CH Furniture"
-            title="Premium craftsmanship, built to last."
-            align="center"
-          />
+          <SectionHeading eyebrow="Questions" title="Good to know." accentWord="Good" />
         </Reveal>
-        <div className="mt-14"><WhyUs /></div>
-      </section>
-
-      {/* Process */}
-      <section className="bg-bark py-24 md:py-32">
-        <div className="container-px">
-          <Reveal>
-            <SectionHeading eyebrow="How we work" title="From timber to treasured piece." align="center" />
-          </Reveal>
-          <div className="mt-14"><Process /></div>
+        <div className="mt-8">
+          <FAQ />
         </div>
       </section>
 
-      {/* Testimonials */}
-      {testimonials.length > 0 && (
-        <section className="container-px py-24 md:py-32">
-          <Reveal>
-            <SectionHeading eyebrow="Kind words" title="Trusted by homes and businesses." align="center" />
-          </Reveal>
-          <div className="mt-14"><Testimonials items={testimonials} /></div>
-        </section>
-      )}
-
-      {/* FAQ */}
-      <section className="container-px py-24 md:py-32">
-        <Reveal>
-          <SectionHeading eyebrow="Questions" title="Good to know." align="center" />
-        </Reveal>
-        <div className="mt-12"><FAQ /></div>
-      </section>
-
-      {/* CTA */}
-      <section className="container-px pb-28"><CTA /></section>
+      {/* ── Workshop Banner / CTA ── */}
+      <WorkshopBanner
+        whatsapp={settings.whatsapp}
+        workshopVideoDesktopUrl={settings.workshopVideoDesktopUrl || undefined}
+        workshopVideoDesktopPosterUrl={settings.workshopVideoDesktopPosterUrl || undefined}
+        workshopVideoMobileUrl={settings.workshopVideoMobileUrl || undefined}
+        workshopVideoMobilePosterUrl={settings.workshopVideoMobilePosterUrl || undefined}
+      />
     </SiteShell>
   );
 }

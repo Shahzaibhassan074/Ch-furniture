@@ -14,7 +14,7 @@ import { prisma } from "@/lib/prisma";
 
 export const revalidate = 60;
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://ch-furniture.vercel.app";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 type Params = { slug: string };
 type Search = { style?: string; wood?: string };
@@ -22,14 +22,22 @@ type Search = { style?: string; wood?: string };
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const cat = await prisma.category.findUnique({ where: { slug: params.slug } });
   if (!cat) return { title: "Collection" };
-  const title = cat.metaTitle || cat.name;
-  const description = cat.metaDescription || cat.description || `Browse our ${cat.name} collection — premium handcrafted wooden furniture by CH FURNITURE, Sialkot, Pakistan.`;
-  const url = `${SITE}/category/${cat.slug}`;
-  const image = cat.bannerUrl || cat.thumbUrl || `${SITE}/og-default.jpg`;
+  const rawCatTitle = cat.metaTitle?.replace(/\s*\|\s*(Chaudhry Furniture House|CH Furniture House)\s*$/i, "").trim();
+  const title = rawCatTitle || cat.name;
+  const description =
+    cat.metaDescription ||
+    `Browse our ${cat.name} collection — premium handcrafted wooden furniture by CH Furniture House, Sialkot, Pakistan. Custom sizes, finishes and wood types available.`;
+  const url   = `${SITE}/category/${cat.slug}`;
+  const image = cat.bannerUrl || cat.thumbUrl || `${SITE}/opengraph-image`;
   return {
     title,
     description,
-    alternates: { canonical: url },
+    keywords: [
+      `${cat.name} Sialkot`, `${cat.name} Pakistan`, `wooden ${cat.name}`,
+      `custom ${cat.name}`, `handcrafted ${cat.name}`, "CH Furniture House",
+      "furniture manufacturer Sialkot", "wooden furniture Pakistan",
+    ],
+    alternates: { canonical: `${SITE}/category/${cat.slug}` },
     openGraph: {
       title,
       description,
@@ -45,13 +53,13 @@ export default async function CategoryPage({
   params,
   searchParams,
 }: {
-  params: Params;
+  params:       Params;
   searchParams: Search;
 }) {
   const [settings, data] = await Promise.all([
     getSettings(),
     getCategoryWithFurniture(params.slug, {
-      style: searchParams.style,
+      style:    searchParams.style,
       woodType: searchParams.wood,
     }),
   ]);
@@ -61,30 +69,28 @@ export default async function CategoryPage({
 
   const pageUrl = `${SITE}/category/${category.slug}`;
 
-  // BreadcrumbList structured data
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE },
+      { "@type": "ListItem", position: 1, name: "Home",        item: SITE },
       { "@type": "ListItem", position: 2, name: "Collections", item: `${SITE}/categories` },
       { "@type": "ListItem", position: 3, name: category.name, item: pageUrl },
     ],
   };
 
-  // ItemList structured data for product grid
   const itemListLd = furniture.length > 0 ? {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: category.name,
-    description: category.description || undefined,
-    url: pageUrl,
+    name:          category.name,
+    description:   category.description || undefined,
+    url:           pageUrl,
     numberOfItems: furniture.length,
     itemListElement: furniture.map((f, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      url: `${SITE}/category/${f.categorySlug}/${f.slug}`,
-      name: f.name,
+      "@type":   "ListItem",
+      position:  i + 1,
+      url:       `${SITE}/category/${f.categorySlug}/${f.slug}`,
+      name:      f.name,
     })),
   } : null;
 
@@ -93,70 +99,80 @@ export default async function CategoryPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
 
-      {/* Banner / Hero Video */}
-      <section className="relative h-[52vh] min-h-[380px] overflow-hidden">
-        {category.heroVideoUrl ? (
-          <video
-            src={category.heroVideoUrl}
-            poster={category.heroVideoPosterUrl || undefined}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          <Image
-            src={category.bannerUrl || "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=2000&q=80"}
-            alt={category.name}
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-espresso via-espresso/50 to-espresso/30" />
-        <div className="container-px relative flex h-full flex-col justify-end pb-12">
-          <Breadcrumbs
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Collections", href: "/categories" },
-              { label: category.name },
-            ]}
-          />
-          <h1 className="mt-4 font-display text-[clamp(2.4rem,7vw,5rem)] font-medium leading-[1] text-linen">
-            {category.name}
-          </h1>
-          {category.description && (
-            <p className="mt-3 max-w-2xl text-linenDim">{category.description}</p>
+      {/* ── Banner / Hero ── */}
+      <section className="container-px pt-24 pb-0 md:pt-28">
+        <div className="relative h-[45vh] min-h-[320px] overflow-hidden rounded-3xl">
+          {category.heroVideoUrl ? (
+            <video
+              src={category.heroVideoUrl}
+              poster={category.heroVideoPosterUrl || undefined}
+              autoPlay muted loop playsInline
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <Image
+              src={category.bannerUrl || "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=1600&q=80"}
+              alt={category.name}
+              fill priority
+              sizes="100vw"
+              className="object-cover"
+            />
           )}
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink/40 to-transparent" />
+
+          <div className="relative flex h-full flex-col justify-end p-8 sm:p-12">
+            <Breadcrumbs
+              items={[
+                { label: "Home",        href: "/" },
+                { label: "Collections", href: "/categories" },
+                { label: category.name },
+              ]}
+              light
+            />
+            <h1 className="mt-4 font-display text-[clamp(2.2rem,6vw,4.5rem)] font-extrabold leading-tight text-white">
+              {category.name}
+            </h1>
+            {category.description && (
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
+                {category.description}
+              </p>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Filters + grid */}
-      <section className="container-px py-14">
-        <Suspense fallback={null}>
-          <CategoryFilters />
-        </Suspense>
-
-        <div className="mt-10">
-          {furniture.length === 0 ? (
-            <div className="rounded-sm border border-walnut/50 bg-bark p-16 text-center">
-              <p className="font-display text-2xl text-linen">No designs match these filters yet.</p>
-              <p className="mt-2 text-linenDim">Try clearing the filters, or message us — we build custom pieces to order.</p>
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {furniture.map((f, i) =>
-                category.videoMode ? (
-                  <VideoFurnitureCard key={f.slug} item={f} whatsapp={settings.whatsapp} index={i} />
-                ) : (
-                  <FurnitureCard key={f.slug} item={f} whatsapp={settings.whatsapp} index={i} />
-                )
-              )}
-            </div>
-          )}
+      {/* ── Filters + grid ── */}
+      <section className="container-px py-12">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <p className="font-sans text-sm text-inkMuted">
+            <span className="font-semibold text-ink">{furniture.length}</span> designs
+          </p>
+          <Suspense fallback={null}>
+            <CategoryFilters />
+          </Suspense>
         </div>
+
+        {furniture.length === 0 ? (
+          <div className="rounded-2xl border border-inkBorder bg-parchment p-16 text-center">
+            <p className="font-display text-2xl font-bold text-ink">
+              No designs match these filters yet.
+            </p>
+            <p className="mt-2 text-inkMuted">
+              Try clearing the filters, or message us — we build custom pieces to order.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {furniture.map((f, i) =>
+              category.videoMode ? (
+                <VideoFurnitureCard key={f.slug} item={f} whatsapp={settings.whatsapp} index={i} />
+              ) : (
+                <FurnitureCard key={f.slug} item={f} whatsapp={settings.whatsapp} index={i} />
+              )
+            )}
+          </div>
+        )}
       </section>
     </SiteShell>
   );

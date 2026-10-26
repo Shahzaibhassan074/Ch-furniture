@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
@@ -7,53 +8,78 @@ import {
   Settings as SettingsIcon, Mail, LogOut, ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CHLogo } from "@/components/site/CHLogo";
 
 const LINKS = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/categories", label: "Categories", icon: Boxes },
-  { href: "/admin/furniture", label: "Furniture", icon: Sofa },
+  { href: "/admin",            label: "Dashboard",    icon: LayoutDashboard },
+  { href: "/admin/categories", label: "Categories",   icon: Boxes },
+  { href: "/admin/furniture",  label: "All Furniture", icon: Sofa },
+  { href: "/admin/messages",   label: "Messages",     icon: Mail },
   { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
-  { href: "/admin/messages", label: "Messages", icon: Mail },
-  { href: "/admin/settings", label: "Settings", icon: SettingsIcon },
+  { href: "/admin/settings",          label: "Settings",        icon: SettingsIcon },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-walnut/50 bg-bark p-5">
-      <div className="px-2">
-        <p className="font-display text-2xl text-linen">CH FURNITURE</p>
-        <p className="text-[10px] uppercase tracking-widest2 text-brass">Admin Panel</p>
+    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-inkBorder bg-parchment">
+      {/* Logo */}
+      <div className="border-b border-inkBorder px-6 py-5">
+        <Link href="/admin">
+          <CHLogo className="h-7 w-auto" />
+        </Link>
+        <p className="mt-2 text-[10px] font-sans font-medium uppercase tracking-widest text-inkMuted">
+          Admin Panel
+        </p>
       </div>
 
-      <nav className="mt-8 flex-1 space-y-1">
-        {LINKS.map((l) => {
-          const active = pathname === l.href || (l.href !== "/admin" && pathname.startsWith(l.href));
-          return (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={cn(
-                "flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm transition-colors",
-                active ? "bg-brass/15 text-brass" : "text-linenDim hover:bg-walnut/40 hover:text-linen"
-              )}
-            >
-              <l.icon className="h-4 w-4" /> {l.label}
-            </Link>
-          );
-        })}
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <div className="space-y-0.5">
+          {LINKS.map((l) => {
+            const active =
+              pathname === l.href ||
+              (l.href !== "/admin" && pathname.startsWith(l.href));
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                prefetch={true}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-sans font-medium transition-colors duration-150",
+                  active
+                    ? "bg-blush text-terra"
+                    : "text-inkMuted hover:bg-stone hover:text-ink"
+                )}
+              >
+                <l.icon className="h-4 w-4 shrink-0" />
+                {l.label}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
-      <div className="space-y-1 border-t border-walnut/50 pt-4">
-        <Link href="/" target="_blank" className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-sm text-linenDim hover:text-linen">
-          <ExternalLink className="h-4 w-4" /> View Site
-        </Link>
-        <button
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
-          className="flex w-full items-center gap-3 rounded-sm px-3 py-2.5 text-sm text-linenDim hover:text-linen"
-        >
-          <LogOut className="h-4 w-4" /> Sign out
-        </button>
+      {/* Bottom actions */}
+      <div className="border-t border-inkBorder px-3 py-4">
+        <div className="space-y-0.5">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-sans font-medium text-inkMuted transition-colors hover:bg-stone hover:text-ink"
+          >
+            <ExternalLink className="h-4 w-4 shrink-0" />
+            View Site
+          </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: "/admin/login" })}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-sans font-medium text-inkMuted transition-colors hover:bg-stone hover:text-red-500"
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            Sign out
+          </button>
+        </div>
       </div>
     </aside>
   );

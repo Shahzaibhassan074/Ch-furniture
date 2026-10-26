@@ -2,13 +2,19 @@ import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import { getSettings } from "@/lib/settings";
+import { getAllCategories } from "@/lib/queries";
 
-/** Wraps every public page with nav, footer and floating WhatsApp. */
 export async function SiteShell({ children }: { children: React.ReactNode }) {
-  const s = await getSettings();
+  const [s, categories] = await Promise.all([getSettings(), getAllCategories()]);
   return (
     <>
-      <Navbar />
+      <Navbar
+        brandName={s.brandName}
+        address={s.address}
+        phone={s.phone}
+        whatsapp={s.whatsapp}
+        categories={categories}
+      />
       <main className="min-h-screen">{children}</main>
       <Footer
         brandName={s.brandName}

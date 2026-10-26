@@ -8,14 +8,14 @@ import { motion } from "framer-motion";
 import { whatsappUrl } from "@/lib/utils";
 
 export type VideoFurnitureCardData = {
-  slug: string;
-  name: string;
-  style?: string | null;
-  woodType?: string | null;
-  shortDesc?: string | null;
-  categorySlug: string;
-  imageUrl?: string | null;
-  videoUrl?: string | null;
+  slug:           string;
+  name:           string;
+  style?:         string | null;
+  woodType?:      string | null;
+  shortDesc?:     string | null;
+  categorySlug:   string;
+  imageUrl?:      string | null;
+  videoUrl?:      string | null;
   videoPosterUrl?: string | null;
 };
 
@@ -24,97 +24,81 @@ export function VideoFurnitureCard({
   whatsapp,
   index = 0,
 }: {
-  item: VideoFurnitureCardData;
+  item:     VideoFurnitureCardData;
   whatsapp: string;
-  index?: number;
+  index?:   number;
 }) {
   const detailHref = `/category/${item.categorySlug}/${item.slug}`;
-  const waMessage = `Hello CH FURNITURE,\nI'm interested in the ${item.name} shown on your website. Please provide pricing, available wood options, delivery information, and customization options.`;
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const waMessage  = `Hello CH Furniture House,\nI'm interested in the ${item.name}. Please send pricing, available wood options and customization options.`;
+  const videoRef   = useRef<HTMLVideoElement>(null);
   const [videoError, setVideoError] = useState(false);
-
   const hasVideo = !!item.videoUrl && !videoError;
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 24 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, delay: (index % 3) * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative overflow-hidden rounded-sm border border-walnut/50 bg-bark"
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: (index % 3) * 0.07, ease: [0.16, 1, 0.3, 1] }}
+      className="group overflow-hidden rounded-2xl border border-inkBorder bg-parchment transition-shadow hover:shadow-md"
     >
       <Link href={detailHref} className="block">
-        <div className="relative aspect-[4/5] overflow-hidden bg-walnut">
-
+        <div className="relative aspect-square overflow-hidden bg-stone">
           {hasVideo ? (
             <>
               <video
                 ref={videoRef}
                 src={item.videoUrl!}
                 poster={item.videoPosterUrl || item.imageUrl || undefined}
-                autoPlay
-                loop
-                muted
-                playsInline
+                autoPlay loop muted playsInline
                 onError={() => setVideoError(true)}
                 className="absolute inset-0 h-full w-full object-cover"
               />
-              {/* Play icon overlay so users know it's a video */}
-              <span className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-espresso/70 px-3 py-1 text-[10px] uppercase tracking-widest text-brass backdrop-blur">
-                <Play className="h-3 w-3 fill-brass" /> Video
+              <span className="absolute left-3 top-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-[10px] font-sans font-medium text-white backdrop-blur">
+                <Play className="h-2.5 w-2.5 fill-white" /> Video
               </span>
             </>
           ) : item.imageUrl ? (
             <Image
               src={item.imageUrl}
               alt={item.name}
-              fill
-              loading="lazy"
-              sizes="(max-width: 768px) 100vw, 33vw"
-              className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110"
+              fill loading="lazy"
+              sizes="(max-width:768px) 100vw, 33vw"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-linenDim">No media</div>
+            <div className="flex h-full items-center justify-center text-sm text-inkMuted">No media</div>
           )}
-
-          <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/10 to-transparent opacity-80" />
-
-          {/* Style chip (only when no video badge) */}
-          {item.style && !hasVideo && (
-            <span className="absolute left-4 top-4 rounded-full bg-espresso/70 px-3 py-1 text-[10px] uppercase tracking-widest2 text-brass backdrop-blur">
-              {item.style}
-            </span>
-          )}
-
-          {/* Bottom content */}
-          <div className="absolute inset-x-0 bottom-0 p-5">
-            <h3 className="font-display text-2xl font-medium text-linen">{item.name}</h3>
-            {item.woodType && (
-              <p className="mt-1 text-xs uppercase tracking-wider text-linenDim">{item.woodType}</p>
-            )}
-            {item.shortDesc && (
-              <p className="mt-2 line-clamp-2 text-sm text-linenDim/90">{item.shortDesc}</p>
-            )}
-          </div>
         </div>
       </Link>
 
-      {/* Action row */}
-      <div className="flex items-stretch border-t border-walnut/50">
-        <a
-          href={whatsappUrl(whatsapp, waMessage)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex flex-1 items-center justify-center gap-2 py-3.5 text-xs uppercase tracking-wider text-[#4ade80] transition-colors hover:bg-[#25D366]/10"
-        >
-          <MessageCircle className="h-4 w-4" /> Ask on WhatsApp
-        </a>
-        <Link
-          href={detailHref}
-          className="flex flex-1 items-center justify-center gap-2 border-l border-walnut/50 py-3.5 text-xs uppercase tracking-wider text-brass transition-colors hover:bg-brass/10"
-        >
-          Enquire <ArrowUpRight className="h-4 w-4" />
+      {/* Card body */}
+      <div className="p-4">
+        <Link href={detailHref}>
+          <h3 className="font-display text-[17px] font-semibold leading-snug text-ink transition-colors group-hover:text-terra line-clamp-2">
+            {item.name}
+          </h3>
         </Link>
+        {(item.style || item.woodType) && (
+          <p className="mt-1 text-[12px] font-sans text-inkMuted">
+            {[item.style, item.woodType].filter(Boolean).join(" · ")}
+          </p>
+        )}
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <span className="badge-blush">
+            <span className="h-1.5 w-1.5 rounded-full bg-terra" />
+            Available
+          </span>
+          <a
+            href={whatsappUrl(whatsapp, waMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Ask on WhatsApp"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-[#25D366] text-white transition-opacity hover:opacity-80"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+          </a>
+        </div>
       </div>
     </motion.article>
   );

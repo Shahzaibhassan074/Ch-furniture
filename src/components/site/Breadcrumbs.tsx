@@ -1,17 +1,39 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function Breadcrumbs({ items }: { items: { label: string; href?: string }[] }) {
+type BreadcrumbsProps = {
+  items: { label: string; href?: string }[];
+  light?: boolean;
+};
+
+export function Breadcrumbs({ items, light = false }: BreadcrumbsProps) {
   return (
-    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wider text-linenDim">
+    <nav
+      aria-label="Breadcrumb"
+      className={cn(
+        "flex flex-wrap items-center gap-1.5 text-[11px] font-sans font-medium uppercase tracking-widest2",
+        light ? "text-white/60" : "text-inkMuted"
+      )}
+    >
       {items.map((item, i) => (
-        <span key={i} className="flex items-center gap-2">
+        <span key={i} className="flex items-center gap-1.5">
           {item.href ? (
-            <Link href={item.href} className="hover:text-brass">{item.label}</Link>
+            <Link
+              href={item.href}
+              className={cn(
+                "transition-colors",
+                light ? "hover:text-white" : "hover:text-terra"
+              )}
+            >
+              {item.label}
+            </Link>
           ) : (
-            <span className="text-brass">{item.label}</span>
+            <span className={light ? "text-white/90" : "text-terra"}>{item.label}</span>
           )}
-          {i < items.length - 1 && <ChevronRight className="h-3 w-3 text-walnut" />}
+          {i < items.length - 1 && (
+            <ChevronRight className="h-3 w-3 opacity-50" />
+          )}
         </span>
       ))}
     </nav>

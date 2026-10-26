@@ -16,8 +16,8 @@ type Testimonial = {
 };
 
 const field =
-  "w-full rounded-sm border border-walnut/60 bg-espresso px-4 py-2.5 text-linen placeholder:text-linenDim/60 focus:border-brass";
-const label = "block text-xs uppercase tracking-wider text-brass mb-1.5";
+  "w-full rounded-lg border border-inkBorder bg-white px-4 py-2.5 text-ink placeholder:text-inkMuted/60 focus:border-terra focus:outline-none focus:ring-1 focus:ring-terra/20 transition-colors";
+const label = "block text-[11px] font-sans font-medium uppercase tracking-wider text-inkMuted mb-1.5";
 
 export function TestimonialsManager({ testimonials }: { testimonials: Testimonial[] }) {
   const [editing, setEditing] = useState<Testimonial | null>(null);
@@ -28,10 +28,15 @@ export function TestimonialsManager({ testimonials }: { testimonials: Testimonia
     <div>
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-display text-4xl text-linen">Testimonials</h1>
-          <p className="mt-1 text-linenDim">{testimonials.length} testimonials</p>
+          <p className="text-[11px] font-sans font-medium uppercase tracking-widest text-inkMuted">Reviews</p>
+          <h1 className="mt-1 font-display text-4xl font-bold text-ink">Testimonials</h1>
+          <p className="mt-1 text-sm text-inkMuted">{testimonials.length} testimonials</p>
         </div>
-        {!showForm && <button onClick={() => setCreating(true)} className="btn-brass"><Plus className="h-4 w-4" /> Add</button>}
+        {!showForm && (
+          <button onClick={() => setCreating(true)} className="btn-terra">
+            <Plus className="h-4 w-4" /> Add
+          </button>
+        )}
       </div>
 
       {showForm ? (
@@ -39,17 +44,29 @@ export function TestimonialsManager({ testimonials }: { testimonials: Testimonia
       ) : (
         <div className="mt-8 space-y-3">
           {testimonials.map((t) => (
-            <div key={t.id} className="flex items-start gap-4 rounded-sm border border-walnut/50 bg-bark p-4">
+            <div
+              key={t.id}
+              className="flex items-start gap-4 rounded-xl border border-inkBorder bg-white p-4 shadow-sm"
+            >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium text-linen">{t.author}</p>
-                  {!t.published && <EyeOff className="h-3.5 w-3.5 text-linenDim" />}
-                  <span className="flex text-brass">{Array.from({ length: t.rating }).map((_, i) => <Star key={i} className="h-3 w-3 fill-brass" />)}</span>
+                  <p className="font-medium text-ink">{t.author}</p>
+                  {!t.published && <EyeOff className="h-3.5 w-3.5 text-inkMuted" />}
+                  <span className="flex text-terra">
+                    {Array.from({ length: t.rating }).map((_, i) => (
+                      <Star key={i} className="h-3 w-3 fill-terra" />
+                    ))}
+                  </span>
                 </div>
-                {t.role && <p className="text-xs text-linenDim">{t.role}</p>}
-                <p className="mt-1 line-clamp-2 text-sm text-linenDim">{t.quote}</p>
+                {t.role && <p className="text-xs text-inkMuted">{t.role}</p>}
+                <p className="mt-1 line-clamp-2 text-sm text-inkMuted">{t.quote}</p>
               </div>
-              <button onClick={() => setEditing(t)} className="rounded-sm border border-walnut/60 px-3 py-2 text-xs text-linenDim hover:text-linen"><Pencil className="h-3.5 w-3.5" /></button>
+              <button
+                onClick={() => setEditing(t)}
+                className="rounded-lg border border-inkBorder px-3 py-2 text-xs text-inkMuted transition-colors hover:border-terra/40 hover:text-terra"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
               <DeleteBtn id={t.id} />
             </div>
           ))}
@@ -67,29 +84,80 @@ function Form({ testimonial, onClose }: { testimonial: Testimonial | null; onClo
       await upsertTestimonial(testimonial?.id ?? null, formData);
       toast.success(testimonial ? "Updated" : "Created");
       onClose();
-    } catch { toast.error("Something went wrong."); }
-    finally { setSaving(false); }
+    } catch {
+      toast.error("Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
   }
   return (
-    <div className="mt-8 rounded-sm border border-walnut/50 bg-bark p-7">
+    <div className="mt-8 rounded-xl border border-inkBorder bg-white p-7 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-2xl text-linen">{testimonial ? "Edit" : "New"} Testimonial</h2>
-        <button onClick={onClose}><X className="h-5 w-5 text-linenDim hover:text-linen" /></button>
+        <h2 className="font-display text-2xl font-bold text-ink">
+          {testimonial ? "Edit" : "New"} Testimonial
+        </h2>
+        <button onClick={onClose} className="rounded-lg p-1 text-inkMuted transition-colors hover:text-ink">
+          <X className="h-5 w-5" />
+        </button>
       </div>
       <form action={action} className="mt-6 space-y-5">
         <div className="grid gap-5 sm:grid-cols-2">
-          <div><label className={label}>Author</label><input name="author" defaultValue={testimonial?.author} required className={field} /></div>
-          <div><label className={label}>Role / location</label><input name="role" defaultValue={testimonial?.role ?? ""} placeholder="e.g. Homeowner, Lahore" className={field} /></div>
+          <div>
+            <label className={label}>Author</label>
+            <input name="author" defaultValue={testimonial?.author} required className={field} />
+          </div>
+          <div>
+            <label className={label}>Role / location</label>
+            <input
+              name="role"
+              defaultValue={testimonial?.role ?? ""}
+              placeholder="e.g. Homeowner, Lahore"
+              className={field}
+            />
+          </div>
         </div>
-        <div><label className={label}>Quote</label><textarea name="quote" defaultValue={testimonial?.quote} required rows={3} className={field} /></div>
+        <div>
+          <label className={label}>Quote</label>
+          <textarea name="quote" defaultValue={testimonial?.quote} required rows={3} className={field} />
+        </div>
         <div className="grid gap-5 sm:grid-cols-3">
-          <div><label className={label}>Rating (1–5)</label><input name="rating" type="number" min={1} max={5} defaultValue={testimonial?.rating ?? 5} className={field} /></div>
-          <div><label className={label}>Sort order</label><input name="sortOrder" type="number" defaultValue={testimonial?.sortOrder ?? 0} className={field} /></div>
-          <label className="flex items-center gap-2 pt-7 text-sm text-linen"><input name="published" type="checkbox" defaultChecked={testimonial?.published ?? true} className="h-4 w-4 accent-brass" /> Published</label>
+          <div>
+            <label className={label}>Rating (1–5)</label>
+            <input
+              name="rating"
+              type="number"
+              min={1}
+              max={5}
+              defaultValue={testimonial?.rating ?? 5}
+              className={field}
+            />
+          </div>
+          <div>
+            <label className={label}>Sort order</label>
+            <input
+              name="sortOrder"
+              type="number"
+              defaultValue={testimonial?.sortOrder ?? 0}
+              className={field}
+            />
+          </div>
+          <label className="flex items-center gap-2 pt-7 text-sm text-ink">
+            <input
+              name="published"
+              type="checkbox"
+              defaultChecked={testimonial?.published ?? true}
+              className="h-4 w-4 accent-terra"
+            />
+            Published
+          </label>
         </div>
         <div className="flex gap-3">
-          <button type="submit" disabled={saving} className="btn-brass disabled:opacity-60">{saving ? "Saving…" : "Save"}</button>
-          <button type="button" onClick={onClose} className="btn-ghost">Cancel</button>
+          <button type="submit" disabled={saving} className="btn-terra disabled:opacity-60">
+            {saving ? "Saving…" : "Save"}
+          </button>
+          <button type="button" onClick={onClose} className="btn-ghost">
+            Cancel
+          </button>
         </div>
       </form>
     </div>
@@ -99,8 +167,25 @@ function Form({ testimonial, onClose }: { testimonial: Testimonial | null; onClo
 function DeleteBtn({ id }: { id: string }) {
   const [confirm, setConfirm] = useState(false);
   return confirm ? (
-    <button onClick={async () => { try { await deleteTestimonial(id); toast.success("Deleted"); } catch { toast.error("Delete failed"); } }} className="rounded-sm border border-red-500/50 px-3 py-2 text-xs text-red-400">Confirm?</button>
+    <button
+      onClick={async () => {
+        try {
+          await deleteTestimonial(id);
+          toast.success("Deleted");
+        } catch {
+          toast.error("Delete failed");
+        }
+      }}
+      className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600"
+    >
+      Confirm?
+    </button>
   ) : (
-    <button onClick={() => setConfirm(true)} className="rounded-sm border border-walnut/60 px-3 py-2 text-linenDim hover:text-red-400"><Trash2 className="h-3.5 w-3.5" /></button>
+    <button
+      onClick={() => setConfirm(true)}
+      className="rounded-lg border border-inkBorder px-3 py-2 text-inkMuted transition-colors hover:border-red-200 hover:text-red-500"
+    >
+      <Trash2 className="h-3.5 w-3.5" />
+    </button>
   );
 }

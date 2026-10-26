@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { cloudinary } from "@/lib/cloudinary";
-import { prisma } from "@/lib/prisma";
+import { supabase } from "@/lib/supabaseClient";
 import { slugify } from "@/lib/utils";
 
 function uploadToCloudinary(buffer: Buffer): Promise<{ url: string; publicId: string }> {
@@ -24,70 +24,80 @@ function uploadToCloudinary(buffer: Buffer): Promise<{ url: string; publicId: st
 }
 
 function detectCategory(filename: string) {
-  const lowerName = filename.toLowerCase();
-  if (lowerName.includes("sofa")) return "Sofa";
-  if (lowerName.includes("bed")) return "Bed";
-  if (lowerName.includes("chair")) return "Chair";
-  if (lowerName.includes("table")) return "Table";
-  if (lowerName.includes("almari") || lowerName.includes("wardrobe")) return "Almari";
+  const n = filename.toLowerCase();
+  if (n.includes("sofa")) return "Sofa";
+  if (n.includes("bed")) return "Bed";
+  if (n.includes("chair")) return "Chair";
+  if (n.includes("table")) return "Table";
+  if (n.includes("almari") || n.includes("wardrobe")) return "Almari";
   return "Other";
 }
 
 function titleFromFilename(filename: string) {
-  const withoutExtension = filename.replace(/\.[^/.]+$/, "");
-  return withoutExtension
+  return filename
+    .replace(/\.[^/.]+$/, "")
     .replace(/[-_]+/g, " ")
     .trim()
-    .replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+    .replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
 }
 
 function uniqueSlug(title: string) {
-  const random = Math.random().toString(36).slice(2, 8);
-  return `${slugify(title)}-${Date.now()}-${random}`;
+  return `${slugify(title)}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
+
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_FILES_PER_BATCH = 50;
 
 export async function bulkUploadAction(formData: FormData) {
   const session = await getServerSession(authOptions);
   if (!session?.user) throw new Error("Unauthorized");
 
-  const files = formData.getAll("files").filter((value): value is File => value instanceof File);
+  const files = formData
+    .getAll("files")
+    .filter((v): v is File => v instanceof File)
+    .slice(0, MAX_FILES_PER_BATCH);
   let count = 0;
 
   for (const file of files) {
     try {
-      if (!file.type.startsWith("image/") || file.size === 0) continue;
+      if (!ALLOWED_IMAGE_TYPES.has(file.type) || file.size === 0 || file.size > MAX_FILE_SIZE_BYTES) continue;
 
       const uploaded = await uploadToCloudinary(Buffer.from(await file.arrayBuffer()));
       const categoryName = detectCategory(file.name);
       const categorySlug = slugify(categoryName);
-      const category = await prisma.category.upsert({
-        where: { slug: categorySlug },
-        update: { name: categoryName },
-        create: { name: categoryName, slug: categorySlug },
-      });
-      const title = titleFromFilename(file.name);
-      const furniture = await prisma.furniture.create({
-        data: {
-          name: title || "Untitled Furniture",
-          slug: uniqueSlug(title || "untitled-furniture"),
-          categoryId: category.id,
-          description: `Premium quality ${categoryName} from CH Furniture. Made with high-quality wood and crafted for lasting beauty.`,
-          published: true,
-          images: {
-            create: {
-              url: uploaded.url,
-              publicId: uploaded.publicId,
-              alt: title || categoryName,
-              isPrimary: true,
-              sortOrder: 0,
-            },
-          },
-        },
-      });
 
-      if (furniture.id) count += 1;
-    } catch (error) {
-      console.error(`Bulk upload failed for ${file.name}:`, error);
+      // Upsert category
+      let categoryId: string;
+      const { data: existingCat } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("slug", categorySlug)
+        .single();
+
+      if (existingCat) {
+        categoryId = existingCat.id;
+      } else {
+        const { data: newCat } = await supabase
+          .from("categories")
+          .insert({ name: categoryName, slug: categorySlug })
+          .select("id")
+          .single();
+        categoryId = newCat!.id;
+      }
+
+      const title = titleFromFilename(file.name);
+      await supabase.from("products").insert({
+        name: title || "Untitled Furniture",
+        slug: uniqueSlug(title || "untitled-furniture"),
+        category_id: categoryId,
+        description: `Premium quality ${categoryName} from CH Furniture. Made with high-quality wood and crafted for lasting beauty.`,
+        is_active: true,
+        images: [{ url: uploaded.url, publicId: uploaded.publicId, is_primary: true, sort_order: 0, alt: title }],
+      });
+      count++;
+    } catch (err) {
+      console.error(`Bulk upload failed for ${file.name}:`, err);
     }
   }
 

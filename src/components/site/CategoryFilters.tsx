@@ -1,14 +1,15 @@
 "use client";
+
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { STYLES, WOOD_TYPES } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
-/** Client filter bar — updates the URL query (?style=&wood=) for SSR filtering. */
 export function CategoryFilters() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const params = useSearchParams();
+  const router    = useRouter();
+  const pathname  = usePathname();
+  const params    = useSearchParams();
   const activeStyle = params.get("style") || "";
-  const activeWood = params.get("wood") || "";
+  const activeWood  = params.get("wood")  || "";
 
   function setParam(key: string, value: string) {
     const next = new URLSearchParams(params.toString());
@@ -18,24 +19,34 @@ export function CategoryFilters() {
   }
 
   const chip = (active: boolean) =>
-    `rounded-full border px-4 py-1.5 text-xs uppercase tracking-wider transition-colors ${
-      active ? "border-brass bg-brass text-espresso" : "border-walnut/60 text-linenDim hover:border-brass/60 hover:text-linen"
-    }`;
+    cn(
+      "rounded-full border px-3.5 py-1.5 text-[11px] font-sans font-medium uppercase tracking-wider transition-all",
+      active
+        ? "border-terra bg-terra text-white"
+        : "border-inkBorder bg-parchment text-inkMuted hover:border-terra/60 hover:text-terra"
+    );
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-xs uppercase tracking-widest2 text-brass">Style</span>
+    <div className="flex flex-wrap items-center gap-4">
+      {/* Style */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-sans uppercase tracking-widest2 text-inkMuted">Style</span>
         <button onClick={() => setParam("style", "")} className={chip(!activeStyle)}>All</button>
         {STYLES.map((s) => (
-          <button key={s} onClick={() => setParam("style", s)} className={chip(activeStyle === s)}>{s}</button>
+          <button key={s} onClick={() => setParam("style", s)} className={chip(activeStyle === s)}>
+            {s}
+          </button>
         ))}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-xs uppercase tracking-widest2 text-brass">Wood</span>
+
+      {/* Wood */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="mr-1 text-[10px] font-sans uppercase tracking-widest2 text-inkMuted">Wood</span>
         <button onClick={() => setParam("wood", "")} className={chip(!activeWood)}>All</button>
         {WOOD_TYPES.map((w) => (
-          <button key={w} onClick={() => setParam("wood", w)} className={chip(activeWood === w)}>{w}</button>
+          <button key={w} onClick={() => setParam("wood", w)} className={chip(activeWood === w)}>
+            {w}
+          </button>
         ))}
       </div>
     </div>

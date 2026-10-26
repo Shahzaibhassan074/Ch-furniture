@@ -1,14 +1,9 @@
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { Sidebar } from "@/components/admin/Sidebar";
 
-export default async function PanelLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) redirect("/admin/login");
-
+// Auth is enforced by middleware — no need to re-verify session here.
+export default function PanelLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-espresso">
+    <div className="flex min-h-screen bg-stone">
       <Sidebar />
       <div className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-5xl p-8">{children}</div>

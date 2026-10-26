@@ -6,5 +6,5 @@ export const dynamic = "force-dynamic";
 
 export default async function NewFurniturePage() {
   const categories = await prisma.category.findMany({ orderBy: { sortOrder: "asc" }, select: { id: true, name: true } });
-  return <FurnitureForm furniture={null} categories={categories} styles={[...STYLES]} woods={[...WOOD_TYPES]} />;
+  return <FurnitureForm furniture={null} categories={categories} styles={STYLES} woods={WOOD_TYPES} />;
 }

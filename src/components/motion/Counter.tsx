@@ -1,18 +1,15 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useInView, useReducedMotion } from "framer-motion";
+import { useInView } from "framer-motion";
 import { formatNumber } from "@/lib/utils";
 
-/** Counts up to `value` when scrolled into view. */
 export function Counter({ value, suffix = "" }: { value: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
-  const reduce = useReducedMotion();
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
     if (!inView) return;
-    if (reduce) { setDisplay(value); return; }
     const duration = 1600;
     const start = performance.now();
     let raf = 0;
@@ -24,7 +21,7 @@ export function Counter({ value, suffix = "" }: { value: number; suffix?: string
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, value, reduce]);
+  }, [inView, value]);
 
   return (
     <span ref={ref}>
