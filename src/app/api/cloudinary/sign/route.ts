@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { cloudinary } from "@/lib/cloudinary";
 
+export const dynamic = "force-dynamic";
+
 const ALLOWED_FORMATS = "jpg,jpeg,png,webp,avif,mp4";
 const MAX_BYTES = 104857600; // 100 MB
 

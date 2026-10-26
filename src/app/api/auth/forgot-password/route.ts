@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { supabase } from "@/lib/supabaseClient";
+
+export const dynamic = "force-dynamic";
 import { sendPasswordResetEmail } from "@/lib/email";
 
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL ?? "").toLowerCase();

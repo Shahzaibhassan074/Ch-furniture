@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
 import { searchFurniture } from "@/lib/queries";
 
+export const dynamic = "force-dynamic";
+
 // Rate limit: 30 requests per IP per minute
 const _rl = new Map<string, { n: number; until: number }>();
 function isAllowed(ip: string): boolean {

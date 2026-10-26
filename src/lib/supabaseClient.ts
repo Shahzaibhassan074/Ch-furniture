@@ -1,9 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Permissive database type — bypasses strict column-level inference so our
-// server-side code compiles without generated types from `supabase gen types`.
-// Using bare `any` for Row/Insert/Update avoids the `{}` inference quirk in
-// Supabase JS v2 when a Record<string,any> is passed through the select transformer.
 type AnyTable = {
   Row: any;
   Insert: any;
@@ -20,22 +16,51 @@ type Database = {
   };
 };
 
-const globalForSupabase = globalThis as unknown as {
-  supabase?: ReturnType<typeof createClient<Database>>;
-};
+let _client: ReturnType<typeof createClient<Database>> | undefined;
 
-if (!globalForSupabase.supabase) {
-  globalForSupabase.supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: { persistSession: false },
-      global: {
-        fetch: (url, options = {}) =>
-          fetch(url, { ...options, keepalive: true }),
-      },
-    }
-  );
+/**
+ * Returns the singleton Supabase admin client, creating it on first call.
+ * Throws a clear error if the required env vars are absent — this surfaces
+ * at request time, not at module-import time, so the build never crashes.
+ */
+export function getSupabase(): ReturnType<typeof createClient<Database>> {
+  if (_client) return _client;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    throw new Error(
+      "[supabase] Missing required env vars: " +
+        [!url && "NEXT_PUBLIC_SUPABASE_URL", !key && "SUPABASE_SERVICE_ROLE_KEY"]
+          .filter(Boolean)
+          .join(", ") +
+        ".\nAdd them in Vercel → Project Settings → Environment Variables."
+    );
+  }
+
+  _client = createClient<Database>(url, key, {
+    auth: { persistSession: false },
+    global: {
+      fetch: (u, options = {}) => fetch(u, { ...options, keepalive: true }),
+    },
+  });
+
+  return _client;
 }
 
-export const supabase = globalForSupabase.supabase;
+/**
+ * Backwards-compatible named export — every existing `import { supabase }` caller
+ * works unchanged. The Proxy defers client creation to first property access so
+ * importing this module never triggers createClient() during the build phase.
+ */
+export const supabase = new Proxy(
+  {} as ReturnType<typeof createClient<Database>>,
+  {
+    get(_target, prop) {
+      const client = getSupabase();
+      const val = (client as any)[prop as string];
+      return typeof val === "function" ? (val as (...a: unknown[]) => unknown).bind(client) : val;
+    },
+  }
+);
