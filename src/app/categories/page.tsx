@@ -10,7 +10,7 @@ export const revalidate = 60;
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 export const metadata: Metadata = {
-  title: "All Furniture Collections | CH Furniture House",
+  title: "All Furniture Collections",
   description:
     "Browse all furniture collections by CH Furniture House — sofas, beds, dining sets, chairs, wardrobes, TV units, carved pieces and custom furniture made in Sialkot, Pakistan.",
   keywords: [

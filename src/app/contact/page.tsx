@@ -13,7 +13,7 @@ export const revalidate = 60;
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 export const metadata: Metadata = {
-  title: "Contact & Workshop | CH Furniture House Sialkot",
+  title: "Contact & Workshop — Sialkot",
   description:
     "Contact CH Furniture House in Sialkot, Pakistan — WhatsApp, call, email or visit the workshop. Custom wooden furniture made to your specifications.",
   keywords: [
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `${SITE}/contact` },
   openGraph: {
-    title: "Contact & Workshop | CH Furniture House Sialkot",
+    title: "Contact & Workshop — Sialkot",
     description:
       "Visit our workshop in Sialkot or message us on WhatsApp. Custom wooden furniture built to your specifications.",
     url: `${SITE}/contact`,

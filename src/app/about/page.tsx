@@ -14,11 +14,11 @@ export const revalidate = 60;
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 export const metadata: Metadata = {
-  title: "About Us | Chaudhry Furniture House",
+  title: "Our Story & Sialkot Workshop",
   description:
-    "The story, craftsmanship and workshop behind Chaudhry Furniture House — premium wooden furniture handmade in Sialkot, Pakistan. Three generations of woodworking heritage.",
+    "The story, craftsmanship and workshop behind CH Furniture House — premium wooden furniture handmade in Sialkot, Pakistan. Three generations of woodworking heritage.",
   keywords: [
-    "Chaudhry Furniture House story",
+    "CH Furniture House story",
     "furniture manufacturer Sialkot history",
     "wooden furniture craftsmanship Pakistan",
     "handmade furniture Sialkot",
@@ -27,16 +27,16 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `${SITE}/about` },
   openGraph: {
-    title: "About Chaudhry Furniture House | Premium Wooden Furniture Sialkot",
+    title: "About CH Furniture House | Premium Wooden Furniture Sialkot",
     description:
-      "The story, craftsmanship and workshop behind Chaudhry Furniture House — premium wooden furniture handmade in Sialkot, Pakistan. Three generations of woodworking heritage.",
+      "The story, craftsmanship and workshop behind CH Furniture House — premium wooden furniture handmade in Sialkot, Pakistan. Three generations of woodworking heritage.",
     url: `${SITE}/about`,
     type: "website",
-    images: [{ url: `${SITE}/opengraph-image`, width: 1200, height: 630, alt: "Chaudhry Furniture House Workshop" }],
+    images: [{ url: `${SITE}/opengraph-image`, width: 1200, height: 630, alt: "CH Furniture House Workshop" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "About Chaudhry Furniture House",
+    title: "About CH Furniture House",
     description: "Three generations of premium wooden furniture craftsmanship in Sialkot, Pakistan.",
     images: [`${SITE}/opengraph-image`],
   },

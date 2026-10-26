@@ -5,7 +5,7 @@ import { SearchClient } from "@/components/site/SearchClient";
 import { getSettings } from "@/lib/settings";
 
 export const metadata: Metadata = {
-  title: "Search | CH Furniture House",
+  title: "Search",
   description:
     "Search the CH Furniture House catalog by name, category, style or wood type — handcrafted wooden furniture from Sialkot, Pakistan.",
   keywords: ["furniture search Sialkot", "wooden furniture catalog Pakistan", "find furniture Chaudhry"],

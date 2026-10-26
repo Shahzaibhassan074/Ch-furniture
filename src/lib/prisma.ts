@@ -103,7 +103,7 @@ export function transformSettings(s: any) {
   if (!s) return null;
   return {
     id: s.id,
-    brandName: s.brand_name ?? "CH FURNITURE",
+    brandName: s.brand_name ?? "CH Furniture House",
     tagline: s.tagline ?? null,
     description: s.description ?? null,
     address: s.address ?? null,

@@ -21,7 +21,7 @@ export function WhatsAppLink({
   children: ReactNode;
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const message = productName
-    ? `Hello CH FURNITURE,\nI'm interested in the ${productName} shown on your website. Please provide pricing, available wood options, delivery information, and customization options.`
+    ? `Hello CH Furniture House,\nI'm interested in the ${productName} shown on your website. Please provide pricing, available wood options, delivery information, and customization options.`
     : baseMessage;
 
   return (
