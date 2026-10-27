@@ -94,9 +94,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     url: SITE_URL,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE_URL}/icon`,
-      width: 32,
-      height: 32,
+      url: `${SITE_URL}/icon.png`,
+      width: 512,
+      height: 512,
     },
     image: `${SITE_URL}/opengraph-image`,
     telephone: s?.phone || "+92-341-6309652",
@@ -142,7 +142,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
-        <link rel="apple-touch-icon" href="/icon.png" />
       </head>
       <body>
         <script
