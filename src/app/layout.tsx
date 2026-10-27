@@ -26,10 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const s = await getSettings().catch(() => null);
   const title =
     s?.seoTitle ||
-    "CH Furniture House | Premium Handcrafted Wooden Furniture — Sialkot, Pakistan";
+    "CH Furniture House | Handcrafted Wooden Furniture in Sialkot, Pakistan";
   const description =
     s?.seoDescription ||
-    "CH Furniture House crafts premium custom wooden furniture in Sialkot, Pakistan. Handmade sofas, beds, dining sets, carved furniture & more. Order to your specifications.";
+    "CH Furniture House makes premium handcrafted solid-wood furniture in Sialkot: sofas, beds, dining sets, wardrobes, carved & custom pieces. Visit our workshop or enquire on WhatsApp.";
   const keywords =
     s?.seoKeywords ||
     "furniture Sialkot, custom wooden furniture Pakistan, handcrafted furniture, CH Furniture House, luxury furniture Pakistan, sheesham furniture, bedroom set Pakistan, sofa set Pakistan, dining table Pakistan, wooden furniture manufacturer Sialkot, jahez furniture Pakistan, bridal furniture set Pakistan";

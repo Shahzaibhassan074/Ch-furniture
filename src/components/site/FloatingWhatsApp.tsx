@@ -9,7 +9,7 @@ export function FloatingWhatsApp({ number, message }: { number: string; message:
       href={whatsappUrl(number, message)}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Chat with CH FURNITURE on WhatsApp"
+      aria-label="Chat with CH Furniture House on WhatsApp"
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 1, type: "spring", stiffness: 200, damping: 18 }}

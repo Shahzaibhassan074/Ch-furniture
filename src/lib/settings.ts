@@ -24,9 +24,9 @@ const SETTINGS_DEFAULTS = {
   youtube: "",
   tiktok: "",
   linkedin: "",
-  seoTitle: "CH Furniture House | Premium Handcrafted Wooden Furniture — Sialkot, Pakistan",
+  seoTitle: "CH Furniture House | Handcrafted Wooden Furniture in Sialkot, Pakistan",
   seoDescription:
-    "CH Furniture House crafts premium custom wooden furniture in Sialkot, Pakistan. Handmade sofas, beds, dining sets, carved furniture & more. Order to your specifications.",
+    "CH Furniture House makes premium handcrafted solid-wood furniture in Sialkot: sofas, beds, dining sets, wardrobes, carved & custom pieces. Visit our workshop or enquire on WhatsApp.",
   seoKeywords:
     "Furniture Manufacturer Pakistan, Furniture Sialkot, Wooden Furniture, Luxury Furniture, Sofa Manufacturer",
   ogImageUrl: "",
