@@ -6,8 +6,8 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { FurnitureCard } from "@/components/site/FurnitureCard";
 import { VideoFurnitureCard } from "@/components/site/VideoFurnitureCard";
 import { CategoryFilters } from "@/components/site/CategoryFilters";
+import { CategoryAbout } from "@/components/site/CategoryAbout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { Reveal } from "@/components/motion/Reveal";
 import { getCategoryWithFurniture } from "@/lib/queries";
 import { getSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
@@ -18,6 +18,15 @@ const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 type Params = { slug: string };
 type Search = { style?: string; wood?: string };
+
+/** First sentence of text, capped at `max` chars at a word boundary. */
+function shortLine(text: string, max = 120): string {
+  const sentence = text.split(/[.!?](?:\s|$)/)[0].trim();
+  if (sentence.length <= max) return sentence;
+  const cut = sentence.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + "…";
+}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const cat = await prisma.category.findUnique({ where: { slug: params.slug } });
@@ -102,7 +111,8 @@ export default async function CategoryPage({
 
       {/* ── Banner / Hero ── */}
       <section className="container-px pt-24 pb-0 md:pt-28">
-        <div className="relative h-[45vh] min-h-[320px] overflow-hidden rounded-3xl">
+        {/* Desktop: 450px tall. Mobile: 320px tall. */}
+        <div className="relative h-[320px] overflow-hidden rounded-3xl md:h-[450px]">
           {category.heroVideoUrl ? (
             <video
               src={category.heroVideoUrl}
@@ -119,10 +129,13 @@ export default async function CategoryPage({
               className="object-cover"
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ink/40 to-transparent" />
 
-          <div className="relative flex h-full flex-col justify-end p-8 sm:p-12">
+          {/* Gradient: bottom-heavy + slight left edge — only behind the text area */}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-ink/75 via-ink/30 to-transparent" />
+          <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-ink/25 to-transparent" />
+
+          {/* Text: bottom-left. Desktop max-w 600px. Mobile max-w 90%. */}
+          <div className="absolute bottom-0 left-0 max-w-[90%] p-6 sm:p-8 md:max-w-[600px] md:p-10">
             <Breadcrumbs
               items={[
                 { label: "Home",        href: "/" },
@@ -131,28 +144,30 @@ export default async function CategoryPage({
               ]}
               light
             />
-            <h1 className="mt-4 font-display text-[clamp(2.2rem,6vw,4.5rem)] font-extrabold leading-tight text-white">
+            <h1 className="mt-3 font-display text-[30px] font-extrabold leading-tight text-white md:text-[48px]">
               {category.name}
             </h1>
             {category.description && (
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/70">
-                {category.description}
+              <p className="mt-2 line-clamp-2 text-[14px] leading-snug text-white/80 md:line-clamp-1 md:text-[17px] md:leading-normal">
+                {shortLine(category.description)}
               </p>
             )}
           </div>
         </div>
       </section>
 
-      {/* ── Filters + grid ── */}
-      <section className="container-px py-12">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <p className="font-sans text-sm text-inkMuted">
-            <span className="font-semibold text-ink">{furniture.length}</span> designs
-          </p>
-          <Suspense fallback={null}>
-            <CategoryFilters />
-          </Suspense>
-        </div>
+      {/* ── Filter chips ── */}
+      <div className="container-px border-b border-inkBorder/40 py-3">
+        <Suspense fallback={null}>
+          <CategoryFilters />
+        </Suspense>
+      </div>
+
+      {/* ── Product grid ── */}
+      <section className="container-px py-10">
+        <p className="mb-6 font-sans text-sm text-inkMuted">
+          <span className="font-semibold text-ink">{furniture.length}</span> designs
+        </p>
 
         {furniture.length === 0 ? (
           <div className="rounded-2xl border border-inkBorder bg-parchment p-16 text-center">
@@ -175,6 +190,11 @@ export default async function CategoryPage({
           </div>
         )}
       </section>
+
+      {/* ── About section (full description, below grid) ── */}
+      {category.description && (
+        <CategoryAbout name={category.name} description={category.description} />
+      )}
     </SiteShell>
   );
 }

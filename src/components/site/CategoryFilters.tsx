@@ -27,27 +27,30 @@ export function CategoryFilters() {
     );
 
   return (
-    <div className="flex flex-wrap items-center gap-4">
-      {/* Style */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[10px] font-sans uppercase tracking-widest2 text-inkMuted">Style</span>
-        <button onClick={() => setParam("style", "")} className={chip(!activeStyle)}>All</button>
-        {STYLES.map((s) => (
-          <button key={s} onClick={() => setParam("style", s)} className={chip(activeStyle === s)}>
-            {s}
-          </button>
-        ))}
-      </div>
+    /* Mobile: single horizontally-scrollable row. Desktop: wrapping rows. */
+    <div className="no-scrollbar overflow-x-auto md:overflow-visible">
+      <div className="flex w-max flex-nowrap items-center gap-4 pb-0.5 md:w-auto md:flex-wrap md:pb-0">
+        {/* Style */}
+        <div className="flex flex-none items-center gap-1.5">
+          <span className="mr-1 text-[10px] font-sans uppercase tracking-widest2 text-inkMuted">Style</span>
+          <button onClick={() => setParam("style", "")} className={chip(!activeStyle)}>All</button>
+          {STYLES.map((s) => (
+            <button key={s} onClick={() => setParam("style", s)} className={chip(activeStyle === s)}>
+              {s}
+            </button>
+          ))}
+        </div>
 
-      {/* Wood */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 text-[10px] font-sans uppercase tracking-widest2 text-inkMuted">Wood</span>
-        <button onClick={() => setParam("wood", "")} className={chip(!activeWood)}>All</button>
-        {WOOD_TYPES.map((w) => (
-          <button key={w} onClick={() => setParam("wood", w)} className={chip(activeWood === w)}>
-            {w}
-          </button>
-        ))}
+        {/* Wood */}
+        <div className="flex flex-none items-center gap-1.5">
+          <span className="mr-1 text-[10px] font-sans uppercase tracking-widest2 text-inkMuted">Wood</span>
+          <button onClick={() => setParam("wood", "")} className={chip(!activeWood)}>All</button>
+          {WOOD_TYPES.map((w) => (
+            <button key={w} onClick={() => setParam("wood", w)} className={chip(activeWood === w)}>
+              {w}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
