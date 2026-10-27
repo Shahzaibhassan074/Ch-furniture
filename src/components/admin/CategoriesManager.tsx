@@ -13,6 +13,7 @@ type Category = {
   slug: string;
   name: string;
   description: string | null;
+  seoText: string | null;
   bannerUrl: string | null;
   thumbUrl: string | null;
   heroVideoUrl: string | null;
@@ -198,6 +199,17 @@ function CategoryForm({
             name="description"
             defaultValue={category?.description ?? ""}
             rows={3}
+            className={field}
+          />
+        </div>
+
+        <div>
+          <label className={label}>SEO text (shown below product grid, 120–180 words)</label>
+          <textarea
+            name="seoText"
+            defaultValue={category?.seoText ?? ""}
+            rows={5}
+            placeholder="Keyword-rich paragraph shown in the 'About our …' section below the grid."
             className={field}
           />
         </div>

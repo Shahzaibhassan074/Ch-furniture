@@ -81,7 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const s = await getSettings().catch(() => null);
   const sameAs = [
     s?.facebook, s?.instagram, s?.youtube, s?.tiktok, s?.linkedin,
-  ].filter(Boolean);
+  ].filter(Boolean).map((url) => (url as string).split("?")[0]);
 
   const localBizLd = {
     "@context": "https://schema.org",

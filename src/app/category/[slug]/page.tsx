@@ -192,8 +192,12 @@ export default async function CategoryPage({
       </section>
 
       {/* ── About section (full description, below grid) ── */}
-      {category.description && (
-        <CategoryAbout name={category.name} description={category.description} />
+      {(category.seoText || category.description) && (
+        <CategoryAbout
+          name={category.name}
+          description={category.description ?? ""}
+          seoText={category.seoText ?? undefined}
+        />
       )}
     </SiteShell>
   );

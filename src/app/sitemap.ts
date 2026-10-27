@@ -4,17 +4,16 @@ import { getAllSlugs } from "@/lib/queries";
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 const staticPriorities: Record<string, number> = {
-  "":           1.0,
+  "":            1.0,
   "/categories": 0.9,
   "/contact":    0.8,
   "/about":      0.7,
-  "/search":     0.3,
 };
 
 // Captured once at cold-start (= deploy time) rather than on every request
 const BUILD_TIME = new Date();
 
-const staticRoutes = ["", "/about", "/categories", "/contact", "/search"].map((p) => ({
+const staticRoutes = ["", "/about", "/categories", "/contact"].map((p) => ({
   url: `${SITE}${p}`,
   lastModified: BUILD_TIME,
   changeFrequency: p === "" || p === "/categories" ? ("daily" as const) : ("weekly" as const),

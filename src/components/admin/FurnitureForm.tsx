@@ -25,6 +25,10 @@ type Furniture = {
   woodType: string | null;
   finish: string | null;
   dimensions: string | null;
+  sizes: string | null;
+  finishOptions: string | null;
+  deliveryTime: string | null;
+  startingPrice: number | null;
   shortDesc: string | null;
   description: string | null;
   features: string | null;
@@ -153,6 +157,22 @@ export function FurnitureForm({
             <div>
               <label className={label}>Dimensions</label>
               <input name="dimensions" defaultValue={furniture?.dimensions ?? ""} placeholder='e.g. 84" W × 36" D × 32" H' className={field} />
+            </div>
+            <div>
+              <label className={label}>Available sizes</label>
+              <input name="sizes" defaultValue={furniture?.sizes ?? ""} placeholder="e.g. 2-seater, 3-seater, L-shape" className={field} />
+            </div>
+            <div>
+              <label className={label}>Finish options</label>
+              <input name="finishOptions" defaultValue={furniture?.finishOptions ?? ""} placeholder="e.g. Walnut, Mahogany, Natural Ash" className={field} />
+            </div>
+            <div>
+              <label className={label}>Delivery time</label>
+              <input name="deliveryTime" defaultValue={furniture?.deliveryTime ?? ""} placeholder="e.g. 4–6 weeks" className={field} />
+            </div>
+            <div>
+              <label className={label}>Starting price (PKR)</label>
+              <input name="startingPrice" type="number" defaultValue={furniture?.startingPrice ?? ""} placeholder="e.g. 45000" className={field} />
             </div>
             <div>
               <label className={label}>Sort order</label>

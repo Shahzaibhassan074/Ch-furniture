@@ -19,6 +19,7 @@ const categorySchema = z.object({
   name: z.string().min(2),
   slug: z.string().optional(),
   description: z.string().optional(),
+  seoText: z.string().optional(),
   bannerUrl: z.string().optional(),
   thumbUrl: z.string().optional(),
   heroVideoUrl: z.string().optional(),
@@ -41,6 +42,7 @@ export async function upsertCategory(id: string | null, formData: FormData) {
   if (id) {
     await supabase.from("categories").update({
       slug, name: data.name, description: data.description || null,
+      seo_text: data.seoText || null,
       banner_url: data.bannerUrl || null, thumb_url: data.thumbUrl || null,
       hero_video_url: data.heroVideoUrl || null,
       hero_video_poster_url: data.heroVideoPosterUrl || null,
@@ -50,6 +52,7 @@ export async function upsertCategory(id: string | null, formData: FormData) {
   } else {
     await supabase.from("categories").insert({
       slug, name: data.name, description: data.description || null,
+      seo_text: data.seoText || null,
       banner_url: data.bannerUrl || null, thumb_url: data.thumbUrl || null,
       hero_video_url: data.heroVideoUrl || null,
       hero_video_poster_url: data.heroVideoPosterUrl || null,
@@ -100,6 +103,10 @@ const furnitureSchema = z.object({
   woodType: z.string().optional(),
   finish: z.string().optional(),
   dimensions: z.string().optional(),
+  sizes: z.string().optional(),
+  finishOptions: z.string().optional(),
+  deliveryTime: z.string().optional(),
+  startingPrice: z.coerce.number().int().positive().optional(),
   shortDesc: z.string().optional(),
   description: z.string().optional(),
   features: z.string().optional(),
@@ -137,6 +144,10 @@ export async function upsertFurniture(
     wood_type: parsed.woodType || null,
     finish: parsed.finish || null,
     dimensions: parsed.dimensions || null,
+    sizes: parsed.sizes || null,
+    finish_options: parsed.finishOptions || null,
+    delivery_time: parsed.deliveryTime || null,
+    starting_price: parsed.startingPrice ?? null,
     short_desc: parsed.shortDesc || null,
     description: parsed.description || null,
     features: featuresArr,

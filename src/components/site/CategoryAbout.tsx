@@ -6,16 +6,18 @@ import { cn } from "@/lib/utils";
 interface Props {
   name: string;
   description: string;
+  seoText?: string;
 }
 
-export function CategoryAbout({ name, description }: Props) {
+export function CategoryAbout({ name, description, seoText }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const body = seoText || description;
 
   return (
     <section className="container-px border-t border-inkBorder/30 py-16">
       <div className="mx-auto max-w-[760px]">
         <h2 className="mb-5 font-display text-2xl font-bold text-ink md:text-3xl">
-          About {name}
+          About our {name}
         </h2>
 
         <div className="relative">
@@ -25,7 +27,7 @@ export function CategoryAbout({ name, description }: Props) {
               !expanded ? "max-h-[6.8em]" : "max-h-none"
             )}
           >
-            {description}
+            {body}
           </p>
 
           {!expanded && (

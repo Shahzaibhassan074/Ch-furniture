@@ -25,6 +25,13 @@ const nextConfig = {
         permanent: true,
       },
       // Old random-suffix product slugs → new readable slugs
+      // Product name typo fixes (2026-10)
+      { source: "/category/sofas/imran-khan-sofa",                     destination: "/category/sofas/royal-carved-tufted-sofa",      permanent: true },
+      { source: "/category/sofas/modren-cushion-sofa",                 destination: "/category/sofas/modern-cushion-sofa",            permanent: true },
+      { source: "/category/sofas/modren-cushion",                      destination: "/category/sofas/modern-cushion-sofa-set",        permanent: true },
+      { source: "/category/beds/modren-single-bed",                    destination: "/category/beds/modern-single-bed",              permanent: true },
+      { source: "/category/sofas/sleek-and-elgenant-with-modren-touch", destination: "/category/sofas/sleek-elegant-modern-sofa",    permanent: true },
+      // Old random-suffix product slugs → new readable slugs
       { source: "/category/beds/beds-mfFyocD9", destination: "/category/beds/elegant-handcrafted-bed-with-premium-cushion-work", permanent: true },
       { source: "/category/beds/beds-RX7Mg0Z5", destination: "/category/beds/elegant-handcrafted-bed-with-premium-cushion-work-2", permanent: true },
       { source: "/category/beds/beds-mdFWSstj", destination: "/category/beds/elegant-handcrafted-bed-with-premium-cushion-work-3", permanent: true },

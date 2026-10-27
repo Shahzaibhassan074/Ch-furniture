@@ -27,6 +27,10 @@ interface RawProduct {
   best_seller: boolean;
   is_active: boolean;
   sort_order: number;
+  sizes: string | null;
+  finish_options: string | null;
+  delivery_time: string | null;
+  starting_price: number | null;
   category_id: string;
   meta_title: string | null;
   meta_description: string | null;
@@ -67,6 +71,10 @@ function normalizeProduct(row: unknown): RawProduct | null {
     best_seller: r.best_seller === true,
     is_active: r.is_active === true,
     sort_order: typeof r.sort_order === "number" ? r.sort_order : 0,
+    sizes: (r.sizes as string | null) ?? null,
+    finish_options: (r.finish_options as string | null) ?? null,
+    delivery_time: (r.delivery_time as string | null) ?? null,
+    starting_price: typeof r.starting_price === "number" ? r.starting_price : null,
     category_id: r.category_id,
     meta_title: (r.meta_title as string | null) ?? null,
     meta_description: (r.meta_description as string | null) ?? null,
@@ -110,6 +118,10 @@ function toDetail(p: RawProduct) {
     published: p.is_active,
     sortOrder: p.sort_order,
     categoryId: p.category_id,
+    sizes: p.sizes,
+    finishOptions: p.finish_options,
+    deliveryTime: p.delivery_time,
+    startingPrice: p.starting_price,
     metaTitle: p.meta_title,
     metaDescription: p.meta_description,
     // Reconstruct images array in the shape the frontend components expect
@@ -300,7 +312,7 @@ export async function getCategoryWithFurniture(
           bannerUrl: cat.banner_url, heroVideoUrl: cat.hero_video_url,
           heroVideoPosterUrl: cat.hero_video_poster_url,
           videoMode: cat.video_mode, featured: cat.featured,
-          sortOrder: cat.sort_order,
+          sortOrder: cat.sort_order, seoText: (cat.seo_text as string | null) ?? null,
         },
         furniture: (furniture ?? []).map(normalizeProduct).filter(Boolean).map((p) => toCard(p!)),
       };

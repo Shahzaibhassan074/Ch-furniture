@@ -89,22 +89,22 @@ export default async function ProductPage({ params }: { params: Params }) {
       name:    "CH Furniture House",
       url:     SITE,
     },
-    offers: {
-      "@type":        "Offer",
-      "@id":          `${productUrl}#offer`,
-      availability:   "https://schema.org/InStock",
-      priceCurrency:  "PKR",
-      priceSpecification: {
-        "@type":          "PriceSpecification",
-        priceCurrency:    "PKR",
-        description:      "Custom pricing — contact for quote",
-      },
-      seller: {
-        "@type": "Organization",
-        "@id":   `${SITE}/#business`,
-        name:    "CH Furniture House",
-      },
-    },
+    ...(item.startingPrice
+      ? {
+          offers: {
+            "@type":       "Offer",
+            "@id":         `${productUrl}#offer`,
+            availability:  "https://schema.org/InStock",
+            price:         item.startingPrice.toString(),
+            priceCurrency: "PKR",
+            seller: {
+              "@type": "Organization",
+              "@id":   `${SITE}/#business`,
+              name:    "CH Furniture House",
+            },
+          },
+        }
+      : {}),
   };
 
   const breadcrumbLd = {
@@ -119,10 +119,13 @@ export default async function ProductPage({ params }: { params: Params }) {
   };
 
   const specs = [
-    { label: "Style",      value: item.style },
-    { label: "Wood Type",  value: item.woodType },
-    { label: "Finish",     value: item.finish },
-    { label: "Dimensions", value: item.dimensions },
+    { label: "Style",          value: item.style },
+    { label: "Wood Type",      value: item.woodType },
+    { label: "Finish",         value: item.finish },
+    { label: "Dimensions",     value: item.dimensions },
+    { label: "Sizes",          value: item.sizes },
+    { label: "Finish Options", value: item.finishOptions },
+    { label: "Delivery Time",  value: item.deliveryTime },
   ].filter((s) => s.value);
 
   return (
@@ -162,6 +165,14 @@ export default async function ProductPage({ params }: { params: Params }) {
 
             {item.shortDesc && (
               <p className="mt-3 text-lg leading-relaxed text-inkMuted">{item.shortDesc}</p>
+            )}
+            {item.startingPrice && (
+              <p className="mt-4 font-sans text-sm text-inkMuted">
+                Starting from{" "}
+                <span className="font-semibold text-ink">
+                  PKR {item.startingPrice.toLocaleString()}
+                </span>
+              </p>
             )}
             {item.description && (
               <p className="mt-4 leading-relaxed text-inkMuted">{item.description}</p>

@@ -48,6 +48,10 @@ function transformProduct(p: any) {
     published: p.is_active !== false,
     sortOrder: p.sort_order ?? 0,
     categoryId: p.category_id,
+    sizes: p.sizes ?? null,
+    finishOptions: p.finish_options ?? null,
+    deliveryTime: p.delivery_time ?? null,
+    startingPrice: p.starting_price ?? null,
     metaTitle: p.meta_title ?? null,
     metaDescription: p.meta_description ?? null,
     createdAt: p.created_at,
@@ -63,6 +67,7 @@ function transformCategory(c: any) {
   return {
     id: c.id, slug: c.slug, name: c.name,
     description: c.description ?? null,
+    seoText: c.seo_text ?? null,
     bannerUrl: c.banner_url ?? null,
     thumbUrl: c.thumb_url ?? null,
     heroVideoUrl: c.hero_video_url ?? null,
