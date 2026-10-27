@@ -27,29 +27,40 @@ UPDATE products SET name = 'Grey Upholstered Headboard Bed',      slug = 'grey-u
 UPDATE products SET name = trim(name) WHERE name != trim(name);
 
 -- Step B: fix all-lowercase names (e.g. "raja dewan" → "Raja Dewan")
--- initcap() capitalises the first letter of every word.
--- NOTE: if any product has a name like "ppc table" that should stay with a
---       specific capitalisation, add an explicit UPDATE before this block.
+-- Apostrophe guard: initcap("king's bed") → "King'S Bed" (wrong), so we skip
+-- any name containing an apostrophe and leave those for manual correction.
 UPDATE products
   SET name = initcap(name)
   WHERE name = lower(name)
-    AND length(trim(name)) > 0;
+    AND length(trim(name)) > 0
+    AND name NOT LIKE '%''%';
 
 -- Step C: fix all-UPPERCASE names (e.g. "CLASSICAL DEWAN" → "Classical Dewan")
--- Skips single-letter and 2-char values to avoid mangling abbreviations.
--- WARNING: initcap("TV UNIT") → "Tv Unit". If any product is named purely in
---          caps for branding reasons, add an exclusion: AND slug != 'your-slug'
+-- Same apostrophe guard applied.
 UPDATE products
   SET name = initcap(name)
   WHERE name = upper(name)
-    AND length(trim(name)) > 3;
+    AND length(trim(name)) > 3
+    AND name NOT LIKE '%''%';
 
--- ── 4. Verify: show any names that still look wrong after the sweep ──────────
--- Run this SELECT after the UPDATEs to catch any edge cases before refreshing the site.
+-- Step D: restore abbreviations that initcap mangles
+-- initcap("ppc wardrobe") → "Ppc Wardrobe"; fix back to "PPC Wardrobe"
+-- Uses \m / \M POSIX word-boundary anchors so only whole words are replaced.
+UPDATE products SET name = regexp_replace(name, '\mPpc\M', 'PPC', 'g') WHERE name ~ '\mPpc\M';
+UPDATE products SET name = regexp_replace(name, '\mTv\M',  'TV',  'g') WHERE name ~ '\mTv\M';
+UPDATE products SET name = regexp_replace(name, '\mMdf\M', 'MDF', 'g') WHERE name ~ '\mMdf\M';
+UPDATE products SET name = regexp_replace(name, '\mLed\M', 'LED', 'g') WHERE name ~ '\mLed\M';
+-- Note: L-Shaped is handled correctly by initcap (capitalises after hyphen), no fix needed.
+
+-- ── 4. Manual review: names skipped due to apostrophes ───────────────────────
+-- These were not touched by the sweep above. Fix them individually if needed.
+SELECT id, name, slug FROM products WHERE name LIKE '%''%' ORDER BY name;
+
+-- ── 5. Verify: show any names that still look wrong after the sweep ──────────
 SELECT id, name, slug
 FROM products
 WHERE
-  name != trim(name)                         -- still has leading/trailing space
-  OR (name = lower(name) AND length(name) > 0) -- still all lowercase
-  OR (name = upper(name) AND length(name) > 3) -- still all uppercase
+  name != trim(name)
+  OR (name = lower(name) AND length(name) > 0 AND name NOT LIKE '%''%')
+  OR (name = upper(name) AND length(name) > 3 AND name NOT LIKE '%''%')
 ORDER BY name;
