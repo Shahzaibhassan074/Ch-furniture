@@ -174,8 +174,16 @@ export default async function ProductPage({ params }: { params: Params }) {
                 </span>
               </p>
             )}
-            {item.description && (
+            {item.description ? (
               <p className="mt-4 leading-relaxed text-inkMuted">{item.description}</p>
+            ) : !item.shortDesc && (
+              <p className="mt-4 leading-relaxed text-inkMuted">
+                The {item.name} is a premium handcrafted{" "}
+                {item.category.name.toLowerCase()} by CH Furniture House, built from{" "}
+                {item.woodType ? item.woodType : "solid wood"} in our Sialkot workshop.
+                Available in custom sizes, finishes, and wood types —
+                contact us on WhatsApp for pricing and lead times.
+              </p>
             )}
 
             {/* Specs */}

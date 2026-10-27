@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { getSettings } from "@/lib/settings";
+import { cleanSocialUrl } from "@/lib/utils";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -79,9 +80,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const s = await getSettings().catch(() => null);
-  const sameAs = [
-    s?.facebook, s?.instagram, s?.youtube, s?.tiktok, s?.linkedin,
-  ].filter(Boolean).map((url) => (url as string).split("?")[0]);
+  const sameAs = [s?.facebook, s?.instagram, s?.youtube, s?.tiktok, s?.linkedin]
+    .map((url) => cleanSocialUrl(url))
+    .filter((url): url is string => Boolean(url));
 
   const localBizLd = {
     "@context": "https://schema.org",

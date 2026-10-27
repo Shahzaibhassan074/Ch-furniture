@@ -40,3 +40,25 @@ export function parseList(value?: string | null): string[] {
 export function formatNumber(n: number): string {
   return new Intl.NumberFormat("en-US").format(n);
 }
+
+/**
+ * Strip tracking query params from a social URL while preserving params that
+ * are load-bearing for the link to work.
+ *
+ * Facebook profile.php URLs need ?id=<numeric_id> to resolve correctly — all
+ * other params (mibextid, rdid, share_url …) are tracking junk.
+ * For every other platform, all query params are stripped.
+ */
+export function cleanSocialUrl(raw: string | null | undefined): string | undefined {
+  if (!raw?.trim()) return undefined;
+  try {
+    const u = new URL(raw.trim());
+    if (u.hostname.includes("facebook.com") && u.pathname.includes("profile.php")) {
+      const id = u.searchParams.get("id");
+      return id ? `${u.origin}${u.pathname}?id=${id}` : `${u.origin}${u.pathname}`;
+    }
+    return `${u.origin}${u.pathname}`;
+  } catch {
+    return raw.trim() || undefined;
+  }
+}

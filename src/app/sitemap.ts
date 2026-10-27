@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import { getAllSlugs } from "@/lib/queries";
 
+// Always read from the database — never serve a build-time cached sitemap.
+export const dynamic = "force-dynamic";
+
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 const staticPriorities: Record<string, number> = {
@@ -10,17 +13,14 @@ const staticPriorities: Record<string, number> = {
   "/about":      0.7,
 };
 
-// Captured once at cold-start (= deploy time) rather than on every request
-const BUILD_TIME = new Date();
-
-const staticRoutes = ["", "/about", "/categories", "/contact"].map((p) => ({
-  url: `${SITE}${p}`,
-  lastModified: BUILD_TIME,
-  changeFrequency: p === "" || p === "/categories" ? ("daily" as const) : ("weekly" as const),
-  priority: staticPriorities[p] ?? 0.7,
-}));
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date();
+  const staticRoutes = ["", "/about", "/categories", "/contact"].map((p) => ({
+    url: `${SITE}${p}`,
+    lastModified: now,
+    changeFrequency: p === "" || p === "/categories" ? ("daily" as const) : ("weekly" as const),
+    priority: staticPriorities[p] ?? 0.7,
+  }));
   // Race the DB call against a 6-second timeout so Google always gets a valid XML response
   const fallback = { cats: [] as any[], items: [] as any[] };
   const timeoutPromise = new Promise<typeof fallback>((resolve) =>

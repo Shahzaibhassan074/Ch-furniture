@@ -200,8 +200,12 @@ export async function upsertFurniture(
     furnitureId = created?.id ?? null;
   }
 
-  if (category?.slug) revalidatePath(`/category/${category.slug}`);
+  if (category?.slug) {
+    revalidatePath(`/category/${category.slug}`);
+    revalidatePath(`/category/${category.slug}/${base.slug}`);
+  }
   revalidateTag("furniture");
+  revalidatePath("/sitemap.xml");
   revalidatePath("/admin/furniture");
   revalidatePath("/");
   return furnitureId;
@@ -212,7 +216,7 @@ export async function deleteFurniture(id: string) {
 
   const { data: p } = await supabase
     .from("products")
-    .select("images, video_url")
+    .select("slug, images, video_url, categories(slug)")
     .eq("id", id)
     .single();
 
@@ -224,7 +228,14 @@ export async function deleteFurniture(id: string) {
   }
 
   await supabase.from("products").delete().eq("id", id);
+
+  const catSlug = (p as any)?.categories?.slug;
+  if (catSlug) {
+    revalidatePath(`/category/${catSlug}`);
+    revalidatePath(`/category/${catSlug}/${(p as any)?.slug}`);
+  }
   revalidateTag("furniture");
+  revalidatePath("/sitemap.xml");
   revalidatePath("/admin/furniture");
 }
 

@@ -3,6 +3,7 @@ import { Footer } from "@/components/site/Footer";
 import { FloatingWhatsApp } from "@/components/site/FloatingWhatsApp";
 import { getSettings } from "@/lib/settings";
 import { getAllCategories } from "@/lib/queries";
+import { cleanSocialUrl } from "@/lib/utils";
 
 export async function SiteShell({ children }: { children: React.ReactNode }) {
   const [s, categories] = await Promise.all([getSettings(), getAllCategories()]);
@@ -24,7 +25,11 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
         whatsapp={s.whatsapp}
         email={s.email}
         whatsappMessage={s.whatsappMessage}
-        social={{ facebook: s.facebook, instagram: s.instagram, youtube: s.youtube }}
+        social={{
+          facebook:  cleanSocialUrl(s.facebook),
+          instagram: cleanSocialUrl(s.instagram),
+          youtube:   cleanSocialUrl(s.youtube),
+        }}
       />
       <FloatingWhatsApp number={s.whatsapp} message={s.whatsappMessage} />
     </>
