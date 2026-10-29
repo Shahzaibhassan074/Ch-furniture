@@ -1,6 +1,5 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { ArrowRight } from "lucide-react";
 import { SiteShell } from "@/components/site/SiteShell";
 const HeroSlider = dynamic(
   () => import("@/components/site/home/HeroSlider").then((m) => ({ default: m.HeroSlider })),
@@ -93,26 +92,22 @@ export default async function HomePage() {
       {/* ── Catalogue — circular orbit showcase ── */}
       <CircularCategoryShowcase categories={categories} totalPieces={totalPieces} />
 
-      {/* ── Featured pieces — horizontal scroll ── */}
+      {/* ── Featured pieces — Best Sellers ── */}
       {featured.length > 0 && (
-        <section className="bg-terra pt-8 pb-8 md:pt-14 md:pb-14">
+        <section className="bg-terra pt-8 pb-8 md:pt-24 md:pb-24">
           <div className="container-px">
-            <div className="mb-4 flex items-end justify-between gap-4 md:mb-6">
-              <div>
-                <p className="eyebrow" style={{ color: "#F5E642" }}>Best Sellers</p>
-                <h2 className="mt-2 font-display text-[clamp(1.7rem,3.5vw,2.6rem)] font-bold text-white">
-                  Pieces worth the visit
-                </h2>
-              </div>
-              <Link
-                href="/categories"
-                className="btn-ghost-white hidden shrink-0 sm:inline-flex"
-              >
-                See all <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-
-            <FeaturedScroller onDark>
+            <FeaturedScroller
+              onDark
+              seeAllHref="/categories"
+              headerLeft={
+                <div>
+                  <p className="eyebrow" style={{ color: "#F5E642" }}>Best Sellers</p>
+                  <h2 className="mt-2 font-display text-[clamp(1.7rem,3.5vw,2.6rem)] font-bold text-white">
+                    Pieces worth the visit
+                  </h2>
+                </div>
+              }
+            >
               {featured.map((f, i) => (
                 <FurnitureCardCompact key={f.slug} item={f} index={i} card />
               ))}
@@ -122,7 +117,7 @@ export default async function HomePage() {
       )}
 
       {/* ── Process — why it takes time ── */}
-      <section className="container-px pb-20">
+      <section className="container-px pt-8 md:pt-14 pb-20">
         <Reveal>
           <Process image={settings.processImageUrl || undefined} />
         </Reveal>
