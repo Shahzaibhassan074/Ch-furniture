@@ -184,8 +184,8 @@ export default async function ContactPage() {
         </Reveal>
       </section>
 
-      {/* Map */}
-      <section className="container-px pb-24">
+      {/* Map — desktop only (mobile has the map inside MobileWorkshopBlock above) */}
+      <section className="hidden md:block container-px pb-24">
         <div className="overflow-hidden rounded-3xl border border-inkBorder">
           <div className="relative h-[260px] sm:h-[360px] md:h-[420px]">
             <iframe
