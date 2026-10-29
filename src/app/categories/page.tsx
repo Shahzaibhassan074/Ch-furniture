@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { CategoryCard } from "@/components/site/CategoryCard";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { Reveal } from "@/components/motion/Reveal";
+import { MobileCategoriesLayout } from "@/components/site/MobileCategoriesLayout";
 import { getAllCategories } from "@/lib/queries";
 
 export const revalidate = 60;
@@ -69,6 +71,7 @@ export default async function CategoriesPage() {
   return (
     <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
+
       {/* Header */}
       <div className="container-px pt-28 pb-10 md:pt-32">
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Collections" }]} />
@@ -88,8 +91,15 @@ export default async function CategoriesPage() {
         </Reveal>
       </div>
 
-      {/* Grid */}
-      <div className="container-px pb-28">
+      {/* Mobile Danube layout */}
+      <div className="md:hidden">
+        <Suspense fallback={<div className="h-[calc(100vh-120px)] bg-cream" />}>
+          <MobileCategoriesLayout categories={categories} />
+        </Suspense>
+      </div>
+
+      {/* Desktop grid — UNCHANGED */}
+      <div className="hidden md:block container-px pb-28">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((c, i) => (
             <CategoryCard key={c.slug} category={c} index={i} />

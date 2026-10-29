@@ -4,6 +4,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { ContactForm } from "@/components/site/ContactForm";
 import { HangingPhone } from "@/components/site/HangingPhone";
+import { MobileWorkshopBlock } from "@/components/site/MobileWorkshopBlock";
 import { Reveal } from "@/components/motion/Reveal";
 import { getSettings } from "@/lib/settings";
 import { whatsappUrl } from "@/lib/utils";
@@ -79,6 +80,20 @@ export default async function ContactPage() {
   return (
     <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBizLd) }} />
+
+      {/* Mobile workshop block — map + quick-action card */}
+      <div className="md:hidden">
+        <MobileWorkshopBlock
+          mapSrc={mapSrc}
+          address={s.address}
+          phone={s.phone}
+          whatsapp={s.whatsapp}
+          whatsappMessage={s.whatsappMessage}
+          businessHours={s.businessHours}
+          categoryThumbs={[]}
+        />
+      </div>
+
       <div className="container-px pt-28 pb-10 md:pt-32 relative overflow-visible">
         <HangingPhone />
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Workshop" }]} />

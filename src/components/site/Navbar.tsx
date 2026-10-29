@@ -7,10 +7,11 @@ import { CHLogo } from "@/components/site/CHLogo";
 import { useEffect, useRef, useState } from "react";
 import {
   Menu, X, Search, MessageCircle, CheckCircle,
-  Phone, ChevronDown, ArrowRight,
+  Phone, ChevronDown, ArrowRight, ChevronRight,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSheet } from "@/context/sheet-context";
 
 type NavCategory = {
   slug:         string;
@@ -51,6 +52,8 @@ export function Navbar({
   const [featured,   setFeatured]   = useState<NavCategory | null>(categories[0] ?? null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const { openWA, setDrawerOpen } = useSheet();
+
   const totalPieces = categories.reduce((s, c) => s + c.count, 0);
 
   const collectionsActive =
@@ -67,6 +70,9 @@ export function Navbar({
 
   /* close both menus on route change */
   useEffect(() => { setMobileOpen(false); setMegaOpen(false); }, [pathname]);
+
+  /* sync mobileOpen to context drawerOpen */
+  useEffect(() => { setDrawerOpen(mobileOpen); }, [mobileOpen, setDrawerOpen]);
 
   /* close mega menu on click-outside */
   useEffect(() => {
@@ -114,7 +120,7 @@ export function Navbar({
       )}>
         <nav className="container-px flex h-[60px] items-center gap-6">
 
-          {/* Logo — plain div on SSR, animated on client after mount */}
+          {/* Logo */}
           <div>
             <Link href="/" aria-label={brandName} className="flex shrink-0 items-center mr-4">
               <CHLogo className="h-8 w-auto sm:h-10" />
@@ -289,7 +295,7 @@ export function Navbar({
                         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
                       </>
                     ) : (
-                      <div className="h-full min-h-[200px] bg-inkSubtle" />
+                      <div className="h-full min-h-[200px] bg-stone" />
                     )}
                     <div className="absolute inset-x-0 bottom-0 p-5">
                       <p className="text-[9px] font-sans font-medium uppercase tracking-widest2 text-white/50">
@@ -319,79 +325,108 @@ export function Navbar({
         )}
       </AnimatePresence>
 
-      {/* ── Mobile menu ── */}
+      {/* ── Mobile drawer ── */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.18 }}
-            className="border-b border-inkBorder bg-cream shadow-lg md:hidden"
-          >
-            <ul className="container-px flex flex-col gap-1 py-4">
-              <li>
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-30 bg-ink/40 md:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            {/* Left drawer 320px */}
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              className="fixed inset-y-0 left-0 z-40 w-[320px] bg-white shadow-2xl flex flex-col overflow-y-auto md:hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-inkBorder shrink-0">
+                <CHLogo className="h-7 w-auto" />
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  aria-label="Close menu"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-inkBorder text-inkMuted"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Collections */}
+              <div className="px-5 pt-5 flex-1">
+                <p className="text-[10px] font-sans font-medium uppercase tracking-widest2 text-inkMuted mb-3">
+                  COLLECTIONS
+                </p>
+                {categories.slice(0, 5).map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    href={`/category/${cat.slug}`}
+                    className="flex items-center gap-3 py-3 border-b border-inkBorder/40 transition-colors hover:text-terra"
+                  >
+                    {cat.thumbUrl ? (
+                      <Image
+                        src={cat.thumbUrl}
+                        alt={cat.name}
+                        width={36}
+                        height={36}
+                        className="h-9 w-9 rounded-xl object-cover shrink-0"
+                      />
+                    ) : (
+                      <div className="h-9 w-9 rounded-xl bg-stone shrink-0" />
+                    )}
+                    <span className="flex-1 font-sans text-[15px] font-medium text-ink">
+                      {cat.name}
+                    </span>
+                    <ChevronRight className="h-4 w-4 text-inkMuted shrink-0" />
+                  </Link>
+                ))}
                 <Link
                   href="/categories"
-                  className={cn(
-                    "block rounded-xl px-4 py-3 font-display text-lg font-semibold transition-colors",
-                    collectionsActive ? "bg-blush text-terra" : "text-ink hover:bg-inkSubtle",
-                  )}
+                  className="mt-3 flex items-center gap-1.5 py-2 text-[13px] font-sans font-medium text-terra"
                 >
-                  Collections
+                  All {categories.length} collections <ArrowRight className="h-3 w-3" />
                 </Link>
-                {/* Mobile sub-list */}
-                {categories.length > 0 && (
-                  <div className="ml-4 mt-1 border-l border-inkBorder pl-4">
-                    {categories.slice(0, 6).map((cat) => (
-                      <Link
-                        key={cat.slug}
-                        href={`/category/${cat.slug}`}
-                        className="flex items-center justify-between py-2 text-[13px] font-sans text-inkMuted hover:text-terra transition-colors"
-                      >
-                        <span>{cat.name}</span>
-                        <span className="text-[11px]">{cat.count}</span>
-                      </Link>
-                    ))}
-                    {categories.length > 6 && (
-                      <Link
-                        href="/categories"
-                        className="mt-1 flex items-center gap-1 py-2 text-[12px] font-sans font-medium text-terra"
-                      >
-                        All {categories.length} collections <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </li>
-              {OTHER_NAV.map((item) => {
-                const active = pathname === item.href || pathname.startsWith(item.href + "/");
-                return (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "block rounded-xl px-4 py-3 font-display text-lg font-semibold transition-colors",
-                        active ? "bg-blush text-terra" : "text-ink hover:bg-inkSubtle",
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                );
-              })}
-              <li className="mt-3">
-                <a
-                  href={`https://wa.me/${whatsapp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-full bg-terra px-5 py-3 text-sm font-sans font-medium text-white"
+              </div>
+
+              {/* Explore */}
+              <div className="px-5 pt-5 flex-1">
+                <p className="text-[10px] font-sans font-medium uppercase tracking-widest2 text-inkMuted mb-3">
+                  EXPLORE
+                </p>
+                {[
+                  { href: "/about",    label: "Our Story" },
+                  { href: "/contact",  label: "Visit the Workshop" },
+                  { href: "/delivery", label: "Delivery & Returns" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block py-2.5 font-sans text-[15px] text-ink hover:text-terra transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Bottom stone block */}
+              <div className="bg-stone px-5 py-5 mt-4 shrink-0">
+                <button
+                  onClick={() => { setMobileOpen(false); openWA(); }}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-3 text-[14px] font-sans font-semibold text-white"
                 >
-                  <MessageCircle className="h-4 w-4" /> WhatsApp Us
-                </a>
-              </li>
-            </ul>
-          </motion.div>
+                  <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
+                </button>
+                <p className="mt-3 text-center text-[12px] font-sans text-inkMuted">
+                  Mon–Sat · 9:00 – 20:00 · Kalaswala, Pasrur
+                </p>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>

@@ -6,6 +6,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { FurnitureCard } from "@/components/site/FurnitureCard";
 import { VideoFurnitureCard } from "@/components/site/VideoFurnitureCard";
 import { CategoryFilters } from "@/components/site/CategoryFilters";
+import { MobileCategoryBar } from "@/components/site/MobileCategoryBar";
 import { CategoryAbout } from "@/components/site/CategoryAbout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { getCategoryWithFurniture } from "@/lib/queries";
@@ -111,8 +112,8 @@ export default async function CategoryPage({
 
       {/* ── Banner / Hero ── */}
       <section className="container-px pt-24 pb-0 md:pt-28">
-        {/* Desktop: 450px tall. Mobile: 320px tall. */}
-        <div className="relative h-[320px] overflow-hidden rounded-3xl md:h-[450px]">
+        {/* Mobile: 150px. Desktop: 450px. */}
+        <div className="relative h-[150px] overflow-hidden rounded-3xl md:h-[450px]">
           {category.heroVideoUrl ? (
             <video
               src={category.heroVideoUrl}
@@ -157,15 +158,20 @@ export default async function CategoryPage({
       </section>
 
       {/* ── Filter chips ── */}
-      <div className="container-px border-b border-inkBorder/40 py-3">
-        <Suspense fallback={null}>
-          <CategoryFilters />
-        </Suspense>
+      <div className="sticky top-[93px] z-20 md:static container-px border-b border-inkBorder/40 py-3 bg-cream/95 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none">
+        {/* Desktop: existing CategoryFilters */}
+        <div className="hidden md:block">
+          <Suspense fallback={null}>
+            <CategoryFilters />
+          </Suspense>
+        </div>
+        {/* Mobile: compact filter bar */}
+        <MobileCategoryBar count={furniture.length} />
       </div>
 
       {/* ── Product grid ── */}
       <section className="container-px py-10">
-        <p className="mb-6 font-sans text-sm text-inkMuted">
+        <p className="mb-6 font-sans text-sm text-inkMuted md:block hidden">
           <span className="font-semibold text-ink">{furniture.length}</span> designs
         </p>
 
@@ -179,7 +185,7 @@ export default async function CategoryPage({
             </p>
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {furniture.map((f, i) =>
               category.videoMode ? (
                 <VideoFurnitureCard key={f.slug} item={f} whatsapp={settings.whatsapp} index={i} />

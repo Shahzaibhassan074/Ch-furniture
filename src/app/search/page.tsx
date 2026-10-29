@@ -3,6 +3,7 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SearchClient } from "@/components/site/SearchClient";
 import { getSettings } from "@/lib/settings";
+import { getFeaturedCategories, getFeaturedFurniture } from "@/lib/queries";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -13,7 +14,12 @@ export const metadata: Metadata = {
 };
 
 export default async function SearchPage() {
-  const s = await getSettings();
+  const [s, featuredCategories, featuredProducts] = await Promise.all([
+    getSettings(),
+    getFeaturedCategories(4),
+    getFeaturedFurniture(4),
+  ]);
+
   return (
     <SiteShell>
       <div className="container-px pt-28 pb-10 md:pt-32">
@@ -25,7 +31,11 @@ export default async function SearchPage() {
         </h1>
       </div>
       <section className="container-px pb-28">
-        <SearchClient whatsapp={s.whatsapp} />
+        <SearchClient
+          whatsapp={s.whatsapp}
+          featuredCategories={featuredCategories}
+          featuredProducts={featuredProducts}
+        />
       </section>
     </SiteShell>
   );
