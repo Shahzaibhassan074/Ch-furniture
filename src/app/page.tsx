@@ -95,27 +95,29 @@ export default async function HomePage() {
 
       {/* ── Featured pieces — horizontal scroll ── */}
       {featured.length > 0 && (
-        <section className="container-px pb-20">
-          <div className="mb-8 flex items-end justify-between gap-4">
-            <div>
-              <p className="eyebrow">Best Sellers</p>
-              <h2 className="mt-2 font-display text-[clamp(1.7rem,3.5vw,2.6rem)] font-bold text-ink">
-                Pieces worth the visit
-              </h2>
+        <section className="bg-terra py-20">
+          <div className="container-px">
+            <div className="mb-8 flex items-end justify-between gap-4">
+              <div>
+                <p className="eyebrow" style={{ color: "#F5E642" }}>Best Sellers</p>
+                <h2 className="mt-2 font-display text-[clamp(1.7rem,3.5vw,2.6rem)] font-bold text-white">
+                  Pieces worth the visit
+                </h2>
+              </div>
+              <Link
+                href="/categories"
+                className="btn-ghost-white hidden shrink-0 sm:inline-flex"
+              >
+                See all <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
-            <Link
-              href="/categories"
-              className="hidden shrink-0 items-center gap-1.5 text-sm font-sans font-medium text-inkMuted hover:text-terra sm:flex"
-            >
-              See all <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
 
-          <FeaturedScroller>
-            {featured.map((f, i) => (
-              <FurnitureCardCompact key={f.slug} item={f} index={i} />
-            ))}
-          </FeaturedScroller>
+            <FeaturedScroller onDark>
+              {featured.map((f, i) => (
+                <FurnitureCardCompact key={f.slug} item={f} index={i} card />
+              ))}
+            </FeaturedScroller>
+          </div>
         </section>
       )}
 

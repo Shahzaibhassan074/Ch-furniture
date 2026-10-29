@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MessageCircle, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { whatsappUrl } from "@/lib/utils";
+import { whatsappUrl, cn } from "@/lib/utils";
 
 export type FurnitureCardData = {
   slug:         string;
@@ -93,9 +93,11 @@ export function FurnitureCard({
 export function FurnitureCardCompact({
   item,
   index = 0,
+  card = false,
 }: {
   item:   FurnitureCardData;
   index?: number;
+  card?:  boolean;
 }) {
   const detailHref = `/category/${item.categorySlug}/${item.slug}`;
 
@@ -106,10 +108,16 @@ export function FurnitureCardCompact({
       whileHover={{ y: -5, transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] } }}
       viewport={{ once: true }}
       transition={{ duration: 0.45, delay: index * 0.06 }}
-      className="group w-[220px] shrink-0 sm:w-[260px]"
+      className={cn(
+        "group w-[220px] shrink-0 sm:w-[260px]",
+        card && "bg-white rounded-2xl p-[10px] shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
+      )}
     >
       <Link href={detailHref}>
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-stone ring-2 ring-terra/0 group-hover:ring-terra/25 transition-all duration-300">
+        <div className={cn(
+          "relative aspect-square overflow-hidden bg-stone ring-2 ring-terra/0 group-hover:ring-terra/25 transition-all duration-300",
+          card ? "rounded-xl" : "rounded-2xl"
+        )}>
           {item.imageUrl ? (
             <Image
               src={item.imageUrl}
@@ -122,7 +130,7 @@ export function FurnitureCardCompact({
             <div className="flex h-full items-center justify-center text-sm text-inkMuted">No image</div>
           )}
         </div>
-        <div className="mt-3 px-1">
+        <div className={cn("mt-3 px-1", card && "mt-2")}>
           <h3 className="font-display text-[15px] font-semibold leading-snug text-ink line-clamp-2 group-hover:text-terra transition-colors duration-200">
             {item.name}
           </h3>
@@ -131,10 +139,17 @@ export function FurnitureCardCompact({
               {[item.style, item.woodType].filter(Boolean).join(" · ")}
             </p>
           )}
-          <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-sans font-medium">
-            <span className="h-1.5 w-1.5 rounded-full bg-terra" />
-            <span className="text-terra">Available</span>
-          </span>
+          {card ? (
+            <span className="badge-blush mt-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-terra" />
+              Available
+            </span>
+          ) : (
+            <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-sans font-medium">
+              <span className="h-1.5 w-1.5 rounded-full bg-terra" />
+              <span className="text-terra">Available</span>
+            </span>
+          )}
         </div>
       </Link>
     </motion.article>
