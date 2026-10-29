@@ -4,20 +4,34 @@ import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X, Play } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useSheet } from "@/context/sheet-context";
 
 type Media =
   | { type: "image"; url: string; alt?: string }
   | { type: "video"; url: string; poster?: string };
 
-export function ProductGallery({ media, name }: { media: Media[]; name: string }) {
+type Props = {
+  media: Media[];
+  name: string;
+  /** Compact/mobile mode: h-[430px], no border/radius, dots instead of thumbs */
+  compact?: boolean;
+};
+
+export function ProductGallery({ media, name, compact = false }: Props) {
   const [active,   setActive]   = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const { setLightboxOpen } = useSheet();
 
   const safe    = media.length ? media : [{ type: "image" as const, url: "", alt: name }];
   const current = safe[Math.min(active, safe.length - 1)];
 
   const next = useCallback(() => setActive((i) => (i + 1) % safe.length),               [safe.length]);
   const prev = useCallback(() => setActive((i) => (i - 1 + safe.length) % safe.length), [safe.length]);
+
+  useEffect(() => {
+    setLightboxOpen(lightbox);
+  }, [lightbox, setLightboxOpen]);
 
   useEffect(() => {
     if (!lightbox) return;
@@ -33,7 +47,14 @@ export function ProductGallery({ media, name }: { media: Media[]; name: string }
   return (
     <div>
       {/* Main viewer */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-inkBorder bg-stone">
+      <div
+        className={cn(
+          "relative overflow-hidden bg-stone",
+          compact
+            ? "h-[430px] rounded-none"
+            : "aspect-[4/3] rounded-2xl border border-inkBorder"
+        )}
+      >
         {current.type === "video" ? (
           <video src={current.url} poster={current.poster} controls className="h-full w-full object-cover" />
         ) : current.url ? (
@@ -73,10 +94,27 @@ export function ProductGallery({ media, name }: { media: Media[]; name: string }
             </button>
           </>
         )}
+
+        {/* Dots indicator — compact mode only */}
+        {compact && safe.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {safe.slice(0, 8).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActive(i)}
+                aria-label={`Go to image ${i + 1}`}
+                className={cn(
+                  "h-1.5 rounded-full transition-all",
+                  i === active ? "w-4 bg-white" : "w-1.5 bg-white/50"
+                )}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Thumbnails */}
-      {safe.length > 1 && (
+      {/* Thumbnails — hidden in compact mode */}
+      {!compact && safe.length > 1 && (
         <div className="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
           {safe.map((m, i) => (
             <button

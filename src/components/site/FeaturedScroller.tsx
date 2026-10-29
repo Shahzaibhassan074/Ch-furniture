@@ -1,74 +1,111 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 
-export function FeaturedScroller({ children }: { children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [canLeft,  setCanLeft]  = useState(false);
-  const [canRight, setCanRight] = useState(false);
+export function FeaturedScroller({
+  children,
+  onDark = false,
+}: {
+  children: React.ReactNode;
+  onDark?: boolean;
+}) {
+  const autoplay = useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })
+  );
 
-  const update = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 4);
-    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
-  }, []);
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { loop: true, align: "start" },
+    [autoplay.current]
+  );
+
+  const [emblaReady, setEmblaReady]     = useState(false);
+  const [selectedSnap, setSelectedSnap] = useState(0);
+  const [snapCount, setSnapCount]       = useState(1);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedSnap(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    update();
-    el.addEventListener("scroll", update, { passive: true });
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => { el.removeEventListener("scroll", update); ro.disconnect(); };
-  }, [update]);
+    if (!emblaApi) return;
+    setEmblaReady(true);
+    setSnapCount(emblaApi.scrollSnapList().length);
+    onSelect();
 
-  const scroll = (dir: "left" | "right") => {
-    const el = ref.current;
-    if (!el) return;
-    el.scrollBy({ left: dir === "right" ? 300 : -300, behavior: "smooth" });
-  };
+    // Respect prefers-reduced-motion
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      autoplay.current.stop();
+    }
+
+    const onReInit = () => setSnapCount(emblaApi.scrollSnapList().length);
+    emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
+    emblaApi.on("reInit", onReInit);
+    return () => {
+      emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
+      emblaApi.off("reInit", onReInit);
+    };
+  }, [emblaApi, onSelect]);
+
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+
+  const progress = snapCount > 1 ? selectedSnap / (snapCount - 1) : 1;
 
   return (
     <div className="relative">
-      {/* Prev — always in DOM, hidden via CSS to avoid hydration mismatch */}
+      {/* Prev */}
       <button
-        onClick={() => scroll("left")}
+        onClick={scrollPrev}
         aria-label="Scroll left"
         className={cn(
-          "absolute -left-4 top-[40%] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md border border-inkBorder text-ink hover:bg-parchment transition-all duration-200",
-          canLeft ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+          "absolute -left-4 top-[40%] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full shadow-md transition-all duration-200",
+          onDark
+            ? "bg-white text-terra border border-white/20 hover:bg-white/90"
+            : "bg-white border border-inkBorder text-ink hover:bg-parchment",
+          emblaReady ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
 
-      {/* Next — always in DOM, hidden via CSS to avoid hydration mismatch */}
+      {/* Next */}
       <button
-        onClick={() => scroll("right")}
+        onClick={scrollNext}
         aria-label="Scroll right"
         className={cn(
-          "absolute -right-4 top-[40%] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-md border border-inkBorder text-ink hover:bg-parchment transition-all duration-200",
-          canRight ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
+          "absolute -right-4 top-[40%] z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full shadow-md transition-all duration-200",
+          onDark
+            ? "bg-white text-terra border border-white/20 hover:bg-white/90"
+            : "bg-white border border-inkBorder text-ink hover:bg-parchment",
+          emblaReady ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         )}
       >
         <ChevronRight className="h-5 w-5" />
       </button>
 
-      {/* Scroll track */}
+      {/* Embla viewport — negative margins bleed cards to container edges */}
       <div
-        ref={ref}
-        className="flex gap-5 overflow-x-auto pb-4 no-scrollbar -mx-5 px-5 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12"
+        ref={emblaRef}
+        className="overflow-hidden -mx-5 px-5 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12"
       >
-        {children}
+        <div className="flex touch-pan-y gap-5 items-start pb-4">
+          {children}
+        </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="mt-3 h-[2px] w-full rounded-full bg-inkBorder overflow-hidden">
-        <div className="h-full w-1/3 rounded-full bg-inkMuted/40" />
+      {/* Progress bar — tracks selected snap index */}
+      <div className={cn("mt-3 h-[2px] w-full rounded-full overflow-hidden", onDark ? "bg-white/20" : "bg-inkBorder")}>
+        <div
+          className={cn("h-full rounded-full transition-[width] duration-300 ease-out", onDark ? "bg-white/50" : "bg-inkMuted/40")}
+          style={{ width: `${Math.max(8, progress * 100)}%` }}
+        />
       </div>
     </div>
   );
