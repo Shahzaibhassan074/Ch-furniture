@@ -95,9 +95,9 @@ export default async function HomePage() {
 
       {/* ── Featured pieces — horizontal scroll ── */}
       {featured.length > 0 && (
-        <section className="bg-terra py-20">
+        <section className="bg-terra pt-8 pb-8 md:pt-14 md:pb-14">
           <div className="container-px">
-            <div className="mb-8 flex items-end justify-between gap-4">
+            <div className="mb-4 flex items-end justify-between gap-4 md:mb-6">
               <div>
                 <p className="eyebrow" style={{ color: "#F5E642" }}>Best Sellers</p>
                 <h2 className="mt-2 font-display text-[clamp(1.7rem,3.5vw,2.6rem)] font-bold text-white">
