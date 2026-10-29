@@ -120,21 +120,28 @@ export function FurnitureCardCompact({
       viewport={{ once: true }}
       transition={{ duration: 0.45, delay: index * 0.06 }}
       className={cn(
+        /* mobile: fixed width pill; desktop: flex-basis driven by Embla */
         "group w-[220px] shrink-0 sm:w-[260px]",
-        card && "bg-white rounded-2xl p-[10px] shadow-[0_4px_20px_rgba(0,0,0,0.12)]"
+        "md:w-auto md:shrink-0 md:flex-[0_0_calc((100%_-_48px)_/_3)] lg:flex-[0_0_calc((100%_-_72px)_/_4)]",
+        /* card variant */
+        card
+          ? "bg-white rounded-2xl p-[10px] shadow-[0_4px_20px_rgba(0,0,0,0.12)] md:p-0 md:overflow-hidden md:flex md:flex-col"
+          : "md:flex md:flex-col"
       )}
     >
-      <Link href={detailHref}>
+      <Link href={detailHref} className="md:flex md:flex-col md:flex-1">
+        {/* Image */}
         <div className={cn(
           "relative aspect-square overflow-hidden bg-stone ring-2 ring-terra/0 group-hover:ring-terra/25 transition-all duration-300",
-          card ? "rounded-xl" : "rounded-2xl"
+          card ? "rounded-xl md:rounded-none md:rounded-t-2xl" : "rounded-2xl",
+          "md:aspect-[4/5]"
         )}>
           {item.imageUrl ? (
             <Image
               src={item.imageUrl}
               alt={item.name}
               fill loading="lazy" quality={70}
-              sizes="260px"
+              sizes="(max-width:767px) 260px, (max-width:1023px) calc((100vw - 96px) / 3), calc((100vw - 128px) / 4)"
               className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
           ) : (
@@ -151,17 +158,22 @@ export function FurnitureCardCompact({
             />
           </div>
         </div>
-        <div className={cn("mt-3 px-1", card && "mt-2")}>
-          <h3 className="font-display text-[15px] font-semibold leading-snug text-ink line-clamp-2 group-hover:text-terra transition-colors duration-200">
+
+        {/* Text body */}
+        <div className={cn(
+          "mt-3 px-1",
+          card && "mt-2",
+          "md:mt-0 md:px-3 md:pt-3 md:pb-3 md:flex md:flex-col md:flex-1"
+        )}>
+          <h3 className="font-display text-[15px] font-semibold leading-snug text-ink line-clamp-2 group-hover:text-terra transition-colors duration-200 md:min-h-[2.6em]">
             {item.name}
           </h3>
-          {(item.style || item.woodType) && (
-            <p className="mt-0.5 text-[11px] font-sans text-inkMuted">
-              {[item.style, item.woodType].filter(Boolean).join(" · ")}
-            </p>
-          )}
+          {/* Always render style line — nbsp keeps height consistent */}
+          <p className="mt-0.5 text-[11px] font-sans text-inkMuted">
+            {[item.style, item.woodType].filter(Boolean).join(" · ") || " "}
+          </p>
           {card ? (
-            <span className="badge-blush mt-2">
+            <span className="badge-blush mt-2 md:mt-auto">
               <span className="h-1.5 w-1.5 rounded-full bg-terra" />
               Available
             </span>
