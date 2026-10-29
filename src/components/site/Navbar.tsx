@@ -8,10 +8,12 @@ import { useEffect, useRef, useState } from "react";
 import {
   Menu, X, Search, MessageCircle, CheckCircle,
   Phone, ChevronDown, ArrowRight, ChevronRight,
+  Headphones, Heart, MapPin,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSheet } from "@/context/sheet-context";
+import { useFavourites } from "@/context/favourites-context";
 
 type NavCategory = {
   slug:         string;
@@ -50,9 +52,13 @@ export function Navbar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [megaOpen,   setMegaOpen]   = useState(false);
   const [featured,   setFeatured]   = useState<NavCategory | null>(categories[0] ?? null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const menuRef       = useRef<HTMLDivElement>(null);
+  const hamburgerRef  = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   const { openWA, setDrawerOpen } = useSheet();
+  const { count: favCount, mounted: favMounted } = useFavourites();
 
   const totalPieces = categories.reduce((s, c) => s + c.count, 0);
 
@@ -60,6 +66,11 @@ export function Navbar({
     pathname === "/categories" || pathname.startsWith("/category/");
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Detect prefers-reduced-motion (client only)
+  useEffect(() => {
+    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -86,14 +97,29 @@ export function Navbar({
     return () => document.removeEventListener("mousedown", handler);
   }, [megaOpen]);
 
+  // Esc key closes drawer
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setMobileOpen(false); hamburgerRef.current?.focus(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
+  // Focus close button when drawer opens
+  useEffect(() => {
+    if (mobileOpen) setTimeout(() => closeButtonRef.current?.focus(), 50);
+  }, [mobileOpen]);
+
   const collectionsPill = megaOpen || collectionsActive;
 
   return (
     <header ref={menuRef} className="fixed inset-x-0 top-0 z-40">
 
-      {/* ── Announcement bar ── */}
-      <div className="border-b border-inkBorder bg-parchment">
-        <div className="container-px flex h-8 items-center justify-between gap-4 text-[11px] font-sans text-inkMuted">
+      {/* ── Announcement bar — desktop only ── */}
+      <div className="hidden md:flex border-b border-inkBorder bg-parchment">
+        <div className="container-px flex h-8 w-full items-center justify-between gap-4 text-[11px] font-sans text-inkMuted">
           <span className="flex shrink-0 items-center gap-1.5">
             <CheckCircle className="h-3 w-3 text-terra" />
             <span>Verified official site</span>
@@ -118,14 +144,23 @@ export function Navbar({
         "border-b border-inkBorder bg-cream transition-shadow duration-300",
         scrolled && "shadow-sm",
       )}>
-        <nav className="container-px flex h-[60px] items-center gap-6">
+        <nav className="container-px flex h-14 md:h-[60px] items-center gap-0 md:gap-6">
+
+          {/* Hamburger — mobile only, first */}
+          <button
+            ref={hamburgerRef}
+            className="flex h-10 w-10 shrink-0 items-center justify-center text-ink md:hidden"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? <X className="h-[22px] w-[22px]" strokeWidth={2} /> : <Menu className="h-[22px] w-[22px]" strokeWidth={2} />}
+          </button>
 
           {/* Logo */}
-          <div>
-            <Link href="/" aria-label={brandName} className="flex shrink-0 items-center mr-4">
-              <CHLogo className="h-8 w-auto sm:h-10" />
-            </Link>
-          </div>
+          <Link href="/" aria-label={brandName} className="ml-2 md:ml-0 flex shrink-0 items-center md:mr-4">
+            <CHLogo className="h-6 w-auto md:h-8" />
+          </Link>
 
           {/* Desktop nav */}
           <ul className="hidden flex-1 items-center justify-center gap-0.5 md:flex">
@@ -184,7 +219,7 @@ export function Navbar({
             })}
           </ul>
 
-          {/* Right: search + WhatsApp */}
+          {/* Right: search + WhatsApp — desktop only */}
           <div className="ml-auto hidden items-center gap-2 md:flex">
             <Link
               href="/search"
@@ -207,15 +242,68 @@ export function Navbar({
             </a>
           </div>
 
-          {/* Mobile toggle */}
-          <button
-            className="ml-auto flex h-9 w-9 items-center justify-center rounded-full border border-inkBorder text-ink md:hidden"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMobileOpen((v) => !v)}
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          {/* Mobile right icon group — md:hidden */}
+          <div className="ml-auto flex items-center md:hidden">
+            {/* Help — opens WhatsApp sheet */}
+            <button
+              onClick={() => openWA()}
+              aria-label="Help & contact"
+              className={cn(
+                "flex h-10 w-10 items-center justify-center text-ink",
+                (pathname === "/contact") && "text-terra"
+              )}
+            >
+              <Headphones className="h-[22px] w-[22px]" strokeWidth={2} />
+            </button>
+
+            {/* Search */}
+            <Link
+              href="/search"
+              aria-label="Search"
+              className={cn(
+                "flex h-10 w-10 items-center justify-center text-ink",
+                pathname === "/search" && "text-terra"
+              )}
+            >
+              <Search className="h-[22px] w-[22px]" strokeWidth={2} />
+            </Link>
+
+            {/* Favourites with count badge */}
+            <Link
+              href="/favourites"
+              aria-label="Favourites"
+              className={cn(
+                "relative flex h-10 w-10 items-center justify-center text-ink",
+                pathname === "/favourites" && "text-terra"
+              )}
+            >
+              <Heart className="h-[22px] w-[22px]" strokeWidth={2} />
+              {favMounted && favCount > 0 && (
+                <span className="absolute right-1 top-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full bg-terra px-[3px] text-[10px] font-sans font-bold leading-none text-white">
+                  {favCount > 99 ? "99+" : favCount}
+                </span>
+              )}
+            </Link>
+          </div>
         </nav>
+      </div>
+
+      {/* ── Delivery strip — mobile only ── */}
+      <div className="border-b border-inkBorder bg-parchment md:hidden">
+        <div className="flex h-8 items-center justify-between gap-2 px-4 text-[12px] font-sans text-inkMuted">
+          <span className="flex min-w-0 items-center gap-1.5 truncate">
+            <MapPin className="h-3 w-3 shrink-0 text-terra" />
+            <span className="truncate">Showroom: Kalaswala, Pasrur · Delivery all over Pakistan</span>
+          </span>
+          <a
+            href="https://maps.google.com/?q=32.2608,74.6618"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 text-[11px] font-medium text-terra hover:underline underline-offset-2"
+          >
+            Directions
+          </a>
+        </div>
       </div>
 
       {/* ── Mega menu dropdown ── */}
@@ -342,13 +430,14 @@ export function Navbar({
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 30 }}
               className="fixed inset-y-0 left-0 z-40 w-[320px] bg-white shadow-2xl flex flex-col overflow-y-auto md:hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-inkBorder shrink-0">
                 <CHLogo className="h-7 w-auto" />
                 <button
+                  ref={closeButtonRef}
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close menu"
                   className="flex h-9 w-9 items-center justify-center rounded-full border border-inkBorder text-inkMuted"

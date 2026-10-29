@@ -6,6 +6,7 @@ import { Check, MessageCircle, ArrowRight, ArrowLeft, Phone } from "lucide-react
 import { SiteShell } from "@/components/site/SiteShell";
 import { ProductGallery } from "@/components/site/ProductGallery";
 import { ShareButton } from "@/components/site/ShareButton";
+import { FavouriteButton } from "@/components/site/FavouriteButton";
 import { FurnitureCard } from "@/components/site/FurnitureCard";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SectionHeading } from "@/components/site/home/Sections";
@@ -151,9 +152,18 @@ export default async function ProductPage({ params }: { params: Params }) {
             </Link>
           </div>
 
-          {/* Floating share button */}
-          <div className="absolute top-[72px] right-4 z-10">
+          {/* Floating action buttons — right column */}
+          <div className="absolute top-[72px] right-4 z-10 flex flex-col gap-2">
             <ShareButton title={item.name} />
+            <FavouriteButton
+              item={{
+                slug:         item.slug,
+                name:         item.name,
+                imageUrl:     item.images.find(i => i.isPrimary)?.url ?? item.images[0]?.url ?? null,
+                categorySlug: item.category.slug,
+                categoryName: item.category.name,
+              }}
+            />
           </div>
         </div>
 

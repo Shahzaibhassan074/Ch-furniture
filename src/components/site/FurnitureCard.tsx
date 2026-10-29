@@ -5,6 +5,7 @@ import Image from "next/image";
 import { MessageCircle, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { whatsappUrl, cn } from "@/lib/utils";
+import { FavouriteButton } from "@/components/site/FavouriteButton";
 
 export type FurnitureCardData = {
   slug:         string;
@@ -51,6 +52,16 @@ export function FurnitureCard({
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-inkMuted">No image</div>
           )}
+          <div className="absolute right-2 top-2 md:hidden">
+            <FavouriteButton
+              item={{
+                slug:         item.slug,
+                name:         item.name,
+                imageUrl:     item.imageUrl ?? null,
+                categorySlug: item.categorySlug,
+              }}
+            />
+          </div>
         </div>
       </Link>
 
@@ -129,6 +140,16 @@ export function FurnitureCardCompact({
           ) : (
             <div className="flex h-full items-center justify-center text-sm text-inkMuted">No image</div>
           )}
+          <div className="absolute right-2 top-2 md:hidden">
+            <FavouriteButton
+              item={{
+                slug:         item.slug,
+                name:         item.name,
+                imageUrl:     item.imageUrl ?? null,
+                categorySlug: item.categorySlug,
+              }}
+            />
+          </div>
         </div>
         <div className={cn("mt-3 px-1", card && "mt-2")}>
           <h3 className="font-display text-[15px] font-semibold leading-snug text-ink line-clamp-2 group-hover:text-terra transition-colors duration-200">
