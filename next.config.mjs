@@ -3,16 +3,18 @@ const nextConfig = {
   reactStrictMode: true,
   typescript: { ignoreBuildErrors: false },
   images: {
+    loader: "custom",
+    loaderFile: "./src/lib/image-loader.ts",
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "images.pexels.com" },
       { protocol: "https", hostname: "mutdqybilhpwxhextcbl.supabase.co" },
     ],
-    formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 86400,
-    deviceSizes: [640, 750, 828, 1080, 1200],
-    imageSizes: [32, 64, 96, 128, 256],
+    // deviceSizes / imageSizes tell Next.js which widths to request;
+    // our loader injects them into the Cloudinary URL.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [32, 64, 128, 256, 384],
   },
   experimental: { optimizePackageImports: ["lucide-react"] },
   async redirects() {
