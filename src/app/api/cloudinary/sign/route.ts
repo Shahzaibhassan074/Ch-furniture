@@ -6,7 +6,6 @@ import { cloudinary } from "@/lib/cloudinary";
 export const dynamic = "force-dynamic";
 
 const ALLOWED_FORMATS = "jpg,jpeg,png,webp,avif,mp4";
-const MAX_BYTES = 104857600; // 100 MB
 
 export async function POST() {
   const session = await getServerSession(authOptions);
@@ -18,7 +17,6 @@ export async function POST() {
   const paramsToSign: Record<string, string | number> = {
     allowed_formats: ALLOWED_FORMATS,
     folder: "ch-furniture",
-    max_bytes: MAX_BYTES,
     timestamp,
   };
 
@@ -34,6 +32,5 @@ export async function POST() {
     cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!,
     folder: "ch-furniture",
     allowedFormats: ALLOWED_FORMATS,
-    maxBytes: MAX_BYTES,
   });
 }
