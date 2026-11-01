@@ -72,15 +72,19 @@ export function FurnitureForm({
   async function action(formData: FormData) {
     setSaving(true);
     try {
-      await upsertFurniture(furniture?.id ?? null, formData, {
+      const result = await upsertFurniture(furniture?.id ?? null, formData, {
         images: newImages.map((m) => ({ url: m.url, publicId: m.publicId })),
         videos: newVideos.map((m) => ({ url: m.url, publicId: m.publicId, posterUrl: m.posterUrl })),
       });
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
       toast.success(furniture ? "Design updated" : "Design created");
       router.push(destination);
       router.refresh();
-    } catch {
-      toast.error("Something went wrong. Please check the form.");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Something went wrong");
     } finally {
       setSaving(false);
     }

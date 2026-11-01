@@ -95,6 +95,8 @@ export async function deleteCategory(id: string) {
 
 /* -------------------------------- Furniture ------------------------------- */
 
+const emptyToUndefined = (v: unknown) => (v === "" || v == null ? undefined : v);
+
 const furnitureSchema = z.object({
   name: z.string().min(2),
   slug: z.string().optional(),
@@ -106,11 +108,11 @@ const furnitureSchema = z.object({
   sizes: z.string().optional(),
   finishOptions: z.string().optional(),
   deliveryTime: z.string().optional(),
-  startingPrice: z.coerce.number().int().positive().optional(),
+  startingPrice: z.preprocess(emptyToUndefined, z.coerce.number().int().positive().optional()),
   shortDesc: z.string().optional(),
   description: z.string().optional(),
   features: z.string().optional(),
-  sortOrder: z.coerce.number().int().default(0),
+  sortOrder: z.preprocess(emptyToUndefined, z.coerce.number().int().default(0)),
 });
 
 export async function upsertFurniture(
@@ -120,10 +122,16 @@ export async function upsertFurniture(
     images: { url: string; publicId: string }[];
     videos: { url: string; publicId: string; posterUrl?: string }[];
   }
-) {
+): Promise<{ ok: true; id: string | null } | { ok: false; error: string }> {
   await requireAdmin();
   const raw = Object.fromEntries(formData);
-  const parsed = furnitureSchema.parse(raw);
+  const parseResult = furnitureSchema.safeParse(raw);
+  if (!parseResult.success) {
+    const first = parseResult.error.errors[0];
+    const field = first.path.join(".") || "form";
+    return { ok: false, error: `${field}: ${first.message}` };
+  }
+  const parsed = parseResult.data;
 
   const featuresArr = (parsed.features || "")
     .split("\n")
@@ -160,7 +168,6 @@ export async function upsertFurniture(
   let furnitureId = id;
 
   if (id) {
-    // Fetch existing images to append to
     const { data: existing } = await supabase
       .from("products")
       .select("images, video_url, video_poster_url")
@@ -176,18 +183,19 @@ export async function upsertFurniture(
       alt: null,
     }));
 
-    await supabase.from("products").update({
+    const { error: dbError } = await supabase.from("products").update({
       ...base,
       images: [...existingImages, ...newImages],
       video_url: media.videos[0]?.url || existing?.video_url || null,
       video_poster_url: media.videos[0]?.posterUrl || existing?.video_poster_url || null,
     }).eq("id", id);
+    if (dbError) return { ok: false, error: dbError.message };
   } else {
     const images = media.images.map((m, i) => ({
       url: m.url, publicId: m.publicId,
       is_primary: i === 0, sort_order: i, alt: null,
     }));
-    const { data: created } = await supabase
+    const { data: created, error: dbError } = await supabase
       .from("products")
       .insert({
         ...base,
@@ -197,6 +205,7 @@ export async function upsertFurniture(
       })
       .select("id")
       .single();
+    if (dbError) return { ok: false, error: dbError.message };
     furnitureId = created?.id ?? null;
   }
 
@@ -208,7 +217,7 @@ export async function upsertFurniture(
   revalidatePath("/sitemap.xml");
   revalidatePath("/admin/furniture");
   revalidatePath("/");
-  return furnitureId;
+  return { ok: true, id: furnitureId };
 }
 
 export async function deleteFurniture(id: string) {
