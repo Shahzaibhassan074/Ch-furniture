@@ -24,7 +24,6 @@ type UploadSignature = {
   cloudName: string;
   folder: string;
   allowedFormats: string;
-  maxBytes: number;
 };
 
 const MAX_UNCOMPRESSED_IMAGE_BYTES = 300 * 1024;
@@ -60,7 +59,6 @@ async function uploadToCloudinary(
   fd.append("signature", sig.signature);
   fd.append("folder", sig.folder);
   fd.append("allowed_formats", sig.allowedFormats);
-  fd.append("max_bytes", String(sig.maxBytes));
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
