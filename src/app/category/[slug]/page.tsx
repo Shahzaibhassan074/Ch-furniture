@@ -9,13 +9,14 @@ import { CategoryFilters } from "@/components/site/CategoryFilters";
 import { MobileCategoryBar } from "@/components/site/MobileCategoryBar";
 import { CategoryAbout } from "@/components/site/CategoryAbout";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
-import { getCategoryWithFurniture } from "@/lib/queries";
+import { getCategoryWithFurniture, getAllCategories } from "@/lib/queries";
 import { getSettings } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
+import { MobileCategoryPage } from "@/components/mobile/pages/MobileCategoryPage";
+import { SITE_URL as SITE } from "@/lib/site";
 
 export const revalidate = 60;
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
+
 
 type Params = { slug: string };
 type Search = { style?: string; wood?: string };
@@ -34,6 +35,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!cat) return { title: "Collection" };
   const rawCatTitle = cat.metaTitle?.replace(/\s*\|\s*(Chaudhry Furniture House|CH Furniture House)\s*$/i, "").trim();
   const title = rawCatTitle || `${cat.name} in Pakistan`;
+  const ogTitle = `${title} | CH Furniture House`;
   const descFallback = cat.description
     ? `${cat.description.slice(0, 120).trim()} — handcrafted in Sialkot, Pakistan. Custom sizes, finishes and wood types available.`
     : `Browse our ${cat.name} collection — premium handcrafted wooden furniture by CH Furniture House, Sialkot. Custom sizes, finishes and wood types available.`;
@@ -50,13 +52,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     ],
     alternates: { canonical: `${SITE}/category/${cat.slug}` },
     openGraph: {
-      title,
+      title: ogTitle,
       description,
       url,
       type: "website",
-      images: [{ url: image, width: 1200, height: 630, alt: title }],
+      images: [{ url: image, width: 1200, height: 630, alt: ogTitle }],
     },
-    twitter: { card: "summary_large_image", title, description, images: [image] },
+    twitter: { card: "summary_large_image", title: ogTitle, description, images: [image] },
   };
 }
 
@@ -67,12 +69,14 @@ export default async function CategoryPage({
   params:       Params;
   searchParams: Search;
 }) {
-  const [settings, data] = await Promise.all([
+  const [settings, data, allCategories, mobileData] = await Promise.all([
     getSettings(),
     getCategoryWithFurniture(params.slug, {
       style:    searchParams.style,
       woodType: searchParams.wood,
     }),
+    getAllCategories(),
+    getCategoryWithFurniture(params.slug),
   ]);
 
   if (!data) notFound();
@@ -106,6 +110,19 @@ export default async function CategoryPage({
   } : null;
 
   return (
+    <>
+    {/* Mobile */}
+    <div className="md:hidden">
+      <MobileCategoryPage
+        category={mobileData?.category ?? category}
+        furniture={mobileData?.furniture ?? furniture}
+        categories={allCategories}
+        settings={settings}
+      />
+    </div>
+
+    {/* Desktop */}
+    <div className="hidden md:contents">
     <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {itemListLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />}
@@ -123,7 +140,7 @@ export default async function CategoryPage({
             />
           ) : (
             <Image
-              src={category.bannerUrl || "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=1600&q=80"}
+              src={category.bannerUrl || category.thumbUrl || "/images/hero/bedroom-set.jpg"}
               alt={category.name}
               fill priority
               sizes="100vw"
@@ -206,5 +223,7 @@ export default async function CategoryPage({
         />
       )}
     </SiteShell>
+    </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import { Toaster } from "sonner";
 import { getSettings } from "@/lib/settings";
 import { cleanSocialUrl } from "@/lib/utils";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -20,7 +21,6 @@ const sans = Inter({
 });
 
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 const SITE_NAME = "CH Furniture House";
 
 export async function generateMetadata(): Promise<Metadata> {

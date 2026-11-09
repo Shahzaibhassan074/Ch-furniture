@@ -3,7 +3,8 @@ import { SiteShell } from "@/components/site/SiteShell";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { SearchClient } from "@/components/site/SearchClient";
 import { getSettings } from "@/lib/settings";
-import { getFeaturedCategories, getFeaturedFurniture } from "@/lib/queries";
+import { getFeaturedCategories, getFeaturedFurniture, getAllCategories } from "@/lib/queries";
+import { MobileSearch } from "@/components/mobile/pages/MobileSearch";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -13,14 +14,28 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function SearchPage() {
-  const [s, featuredCategories, featuredProducts] = await Promise.all([
+export default async function SearchPage({
+  searchParams,
+}: {
+  searchParams?: { q?: string };
+}) {
+  const q = searchParams?.q ?? "";
+  const [s, featuredCategories, featuredProducts, allCategories] = await Promise.all([
     getSettings(),
     getFeaturedCategories(4),
     getFeaturedFurniture(4),
+    getAllCategories(),
   ]);
 
   return (
+    <>
+    {/* Mobile */}
+    <div className="md:hidden">
+      <MobileSearch settings={s} categories={allCategories} initialQuery={q} />
+    </div>
+
+    {/* Desktop */}
+    <div className="hidden md:contents">
     <SiteShell>
       <div className="container-px pt-28 pb-10 md:pt-32">
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Search" }]} />
@@ -35,8 +50,11 @@ export default async function SearchPage() {
           whatsapp={s.whatsapp}
           featuredCategories={featuredCategories}
           featuredProducts={featuredProducts}
+          initialQuery={q}
         />
       </section>
     </SiteShell>
+    </div>
+    </>
   );
 }

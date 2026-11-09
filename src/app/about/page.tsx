@@ -7,11 +7,13 @@ import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { Stats, Process, CTA } from "@/components/site/home/Sections";
 import { Reveal } from "@/components/motion/Reveal";
 import { getSettings } from "@/lib/settings";
+import { getAllCategories } from "@/lib/queries";
 import { withRetry } from "@/lib/prisma";
+import { MobileAbout } from "@/components/mobile/pages/MobileAbout";
+import { SITE_URL as SITE } from "@/lib/site";
 
 export const revalidate = 60;
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
+
 
 export const metadata: Metadata = {
   title: "Our Story & Sialkot Workshop",
@@ -43,7 +45,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const s = await withRetry(() => getSettings());
+  const [s, allCategories] = await Promise.all([
+    withRetry(() => getSettings()),
+    getAllCategories(),
+  ]);
 
   const orgLd = {
     "@context": "https://schema.org",
@@ -67,6 +72,14 @@ export default async function AboutPage() {
   };
 
   return (
+    <>
+    {/* Mobile */}
+    <div className="md:hidden">
+      <MobileAbout settings={s} categories={allCategories} />
+    </div>
+
+    {/* Desktop */}
+    <div className="hidden md:contents">
     <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
       {/* Header */}
@@ -217,5 +230,7 @@ export default async function AboutPage() {
         <CTA />
       </section>
     </SiteShell>
+    </div>
+    </>
   );
 }

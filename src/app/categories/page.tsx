@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { SiteShell } from "@/components/site/SiteShell";
 import { CategoryCard } from "@/components/site/CategoryCard";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
 import { Reveal } from "@/components/motion/Reveal";
-import { MobileCategoriesLayout } from "@/components/site/MobileCategoriesLayout";
 import { getAllCategories } from "@/lib/queries";
+import { getSettings } from "@/lib/settings";
+import { MobileCategories } from "@/components/mobile/pages/MobileCategories";
+import { SITE_URL as SITE } from "@/lib/site";
 
 export const revalidate = 60;
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
+
 
 export const metadata: Metadata = {
   title: "All Furniture Collections",
@@ -44,7 +44,10 @@ export const metadata: Metadata = {
 };
 
 export default async function CategoriesPage() {
-  const categories = await getAllCategories();
+  const [categories, settings] = await Promise.all([
+    getAllCategories(),
+    getSettings(),
+  ]);
 
   const collectionLd = {
     "@context": "https://schema.org",
@@ -69,43 +72,46 @@ export default async function CategoriesPage() {
   };
 
   return (
-    <SiteShell>
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
 
-      {/* Header */}
-      <div className="container-px pt-28 pb-10 md:pt-32">
-        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Collections" }]} />
-        <Reveal>
-          <p className="eyebrow mt-8">The Catalogue</p>
-          <h1 className="mt-3 max-w-3xl font-display text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-tight text-ink">
-            {categories.length} collections,{" "}
-            <span className="text-terra">
-              {categories.reduce((s, c) => s + (c.count ?? 0), 0)} pieces
-            </span>{" "}
-            handcrafted.
-          </h1>
-          <p className="mt-4 max-w-xl text-base text-inkMuted">
-            Every category is fully customizable — explore the designs, then message us to tailor
-            any piece to your space, dimensions and finish.
-          </p>
-        </Reveal>
-      </div>
-
-      {/* Mobile Danube layout */}
+      {/* Mobile */}
       <div className="md:hidden">
-        <Suspense fallback={<div className="h-[calc(100vh-120px)] bg-cream" />}>
-          <MobileCategoriesLayout categories={categories} />
-        </Suspense>
+        <MobileCategories settings={settings} categories={categories} />
       </div>
 
-      {/* Desktop grid — UNCHANGED */}
-      <div className="hidden md:block container-px pb-28">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((c, i) => (
-            <CategoryCard key={c.slug} category={c} index={i} />
-          ))}
+      {/* Desktop */}
+      <div className="hidden md:contents">
+      <SiteShell>
+        {/* Header */}
+        <div className="container-px pt-28 pb-10 md:pt-32">
+          <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Collections" }]} />
+          <Reveal>
+            <p className="eyebrow mt-8">The Catalogue</p>
+            <h1 className="mt-3 max-w-3xl font-display text-[clamp(2.2rem,5.5vw,4rem)] font-extrabold leading-tight text-ink">
+              {categories.length} collections,{" "}
+              <span className="text-terra">
+                {categories.reduce((s, c) => s + (c.count ?? 0), 0)} pieces
+              </span>{" "}
+              handcrafted.
+            </h1>
+            <p className="mt-4 max-w-xl text-base text-inkMuted">
+              Every category is fully customizable — explore the designs, then message us to tailor
+              any piece to your space, dimensions and finish.
+            </p>
+          </Reveal>
         </div>
+
+        {/* Desktop grid — UNCHANGED */}
+        <div className="container-px pb-28">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {categories.map((c, i) => (
+              <CategoryCard key={c.slug} category={c} index={i} />
+            ))}
+          </div>
+        </div>
+      </SiteShell>
       </div>
-    </SiteShell>
+    </>
   );
 }

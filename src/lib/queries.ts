@@ -380,10 +380,10 @@ export async function getAllSlugs() {
   ]);
 
   return {
-    cats: (cats ?? []).map((c) => ({ slug: c.slug, updatedAt: c.updated_at })),
+    cats: (cats ?? []).map((c) => ({ slug: c.slug, updatedAt: new Date(c.updated_at) })),
     items: (items ?? []).map((p: any) => ({
       slug: p.slug,
-      updatedAt: p.updated_at,
+      updatedAt: new Date(p.updated_at),
       category: { slug: p.categories?.slug ?? "" },
     })),
   };
