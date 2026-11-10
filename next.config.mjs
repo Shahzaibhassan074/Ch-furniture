@@ -28,7 +28,7 @@ const nextConfig = {
       },
 
       // ── A: Product slug renames (old slug → new live slug) ─────────────────
-      { source: "/category/double-bed/classical-double-bed",                       destination: "/category/double-bed/wooden-bunk-bed",                             permanent: true },
+      { source: "/category/double-bed/classical-double-bed",                       destination: "/category/double-bed",                                             permanent: true }, // renamed to wooden-bunk-bed, then deleted
       { source: "/category/wardrobes/custom-build-wardrobe",                       destination: "/category/wardrobes/dark-3-door-wardrobe-with-mirror",             permanent: true },
       { source: "/category/dining/elegant-and-clean-dining-set",                   destination: "/category/dining/glass-top-4-seater-dining-set",                   permanent: true },
       { source: "/category/dining/fine-closure-dining-set",                        destination: "/category/dining/space-saving-oval-dining-set",                    permanent: true },
@@ -53,6 +53,7 @@ const nextConfig = {
       { source: "/category/double-bed/wooden-work-double-bed",                     destination: "/category/double-bed/natural-wood-bunk-bed",                       permanent: true },
 
       // ── B: Deleted products → their category page ──────────────────────────
+      { source: "/category/double-bed/wooden-bunk-bed",         destination: "/category/double-bed",   permanent: true },
       { source: "/category/full-bed-set/bed-sets",              destination: "/category/beds",         permanent: true },
       { source: "/category/chairs/classical-bed-room-chairs",   destination: "/category/chairs",       permanent: true },
       { source: "/category/chairs/grace-classy-wooden-chair",   destination: "/category/chairs",       permanent: true },
