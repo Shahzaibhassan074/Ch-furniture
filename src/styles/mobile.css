@@ -1,0 +1,119 @@
+/* ── Mobile keyframes ── */
+@keyframes m-ken-burns {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+@keyframes m-shine {
+  0%        { transform: translateX(-120%) skewX(-20deg); }
+  60%, 100% { transform: translateX(420%) skewX(-20deg); }
+}
+@keyframes m-slide-in {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+@keyframes m-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+@keyframes m-dim {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes m-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes m-bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-3px) scale(1.06); }
+}
+@keyframes m-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,.7); }
+  100% { box-shadow: 0 0 0 12px rgba(255,255,255,0); }
+}
+@keyframes m-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+@keyframes m-twinkle {
+  0%, 100% { opacity: .25; transform: scale(.6) rotate(0deg); }
+  50%       { opacity: 1;   transform: scale(1.15) rotate(45deg); }
+}
+@keyframes m-chips {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/*
+ * Decorative animations below use !important longhands so they override
+ * the global `prefers-reduced-motion` rule in globals.css which sets
+ * `animation-duration: 0.001ms !important` on `*`.
+ * Class selectors (specificity 0,0,1,0) beat `*` (0,0,0,0) among
+ * equally-precedenced !important declarations.
+ *
+ * Structural / UI transitions (m-ken-burns, m-sheet-up, m-slide-in, m-fade)
+ * stay as inline styles and correctly respect reduced-motion.
+ */
+
+/* ── Chip track — pure CSS infinite scroll ── */
+.m-chips-track {
+  animation-name: m-chips !important;
+  animation-duration: 40s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0s !important;
+  animation-play-state: running !important;
+  will-change: transform;
+}
+.m-chips-track:hover,
+.m-chips-track:active {
+  animation-play-state: paused !important;
+}
+
+/* ── Chip thumb bob ── */
+.m-bob-thumb {
+  animation-name: m-bob !important;
+  animation-duration: 2.6s !important;
+  animation-timing-function: ease-in-out !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0s !important;
+}
+/* odd chips get this second class for the staggered delay */
+.m-bob-thumb-d {
+  animation-delay: 1.3s !important;
+}
+
+/* ── Shaadi strip shimmer ── */
+.m-shine {
+  animation-name: m-shine !important;
+  animation-duration: 3.2s !important;
+  animation-timing-function: ease-in-out !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0s !important;
+}
+
+/* ── Shaadi strip twinkle stars ── */
+.m-twinkle {
+  animation-name: m-twinkle !important;
+  animation-duration: 1.6s !important;
+  animation-timing-function: ease-in-out !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0s !important;
+}
+.m-twinkle-delay {
+  animation-name: m-twinkle !important;
+  animation-duration: 1.6s !important;
+  animation-timing-function: ease-in-out !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0.8s !important;
+}
+
+/* ── Shop-the-Look hotspot pulse ── */
+.m-pulse-btn {
+  animation-name: m-pulse !important;
+  animation-duration: 1.8s !important;
+  animation-timing-function: ease-out !important;
+  animation-iteration-count: infinite !important;
+  animation-delay: 0s !important;
+}
