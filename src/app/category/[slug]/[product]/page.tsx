@@ -17,6 +17,39 @@ import { SITE_URL as SITE } from "@/lib/site";
 
 export const revalidate = 60;
 
+// Map category slug → singular display word used in SEO titles.
+const CAT_SINGULAR: Record<string, string> = {
+  sofas: "Sofa", beds: "Bed", "double-bed": "Double Bed",
+  chairs: "Chair", dining: "Dining Set", wardrobes: "Wardrobe",
+  "tv-units": "TV Unit", "office-furniture": "Office Furniture",
+  dewan: "Dewan", tables: "Table", jhoola: "Jhoola",
+};
+
+/**
+ * Build a product <title> from the template:
+ *   {name} — {wood} {catSingular} in Pakistan
+ * Root layout appends " | CH Furniture House", so we budget 39 chars (60 − 21).
+ * Truncation order: drop " in Pakistan" first, then {wood}; last resort = name only.
+ */
+function buildProductTitle(
+  name: string,
+  woodType: string | null | undefined,
+  catSlug: string,
+  catName: string,
+): string {
+  const BRAND_LEN = 21; // " | CH Furniture House"
+  const LIMIT = 60 - BRAND_LEN;
+  const catS = CAT_SINGULAR[catSlug] ?? catName.replace(/s$/i, "");
+  const wood = woodType ? `${woodType} ` : "";
+
+  const candidates = [
+    `${name} — ${wood}${catS} in Pakistan`,
+    `${name} — ${wood}${catS}`,
+    `${name} — ${catS}`,
+    name,
+  ];
+  return candidates.find((c) => c.length <= LIMIT) ?? name;
+}
 
 type Params = { slug: string; product: string };
 
@@ -25,7 +58,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   if (!item || !item.category || !item.published) notFound();
   const img   = item.images.find((i) => i.isPrimary)?.url ?? item.images[0]?.url;
   const rawTitle = item.metaTitle?.replace(/\s*\|\s*(Chaudhry Furniture House|CH Furniture House)\s*$/i, "").trim();
-  const title = rawTitle || item.name;
+  const title = rawTitle ||
+    buildProductTitle(item.name, item.woodType, item.category.slug, item.category.name);
   const ogTitle = `${title} | CH Furniture House`;
   const catName = item.category.name.toLowerCase();
   const description =

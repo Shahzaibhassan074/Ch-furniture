@@ -2,7 +2,8 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PRODUCT_RE = /^\/category\/[^/]+\/([^/]+)$/;
+// Matches exactly /category/<catSlug>/<productSlug> — no more, no fewer segments.
+const PRODUCT_RE = /^\/category\/([^/]+)\/([^/]+)$/;
 
 const NOT_FOUND_HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -28,17 +29,40 @@ const NOT_FOUND_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
-async function isProductActive(slug: string): Promise<boolean> {
+type ProductInfo = { active: boolean; categorySlug: string | null };
+
+async function getProductInfo(productSlug: string): Promise<ProductInfo | null> {
+  // Anon (public) key only — read-only, obeys RLS, never the service-role key.
+  // If the key is absent (misconfigured env), fail open so users are never blocked.
+  const apiKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!apiKey) return null;
+
   try {
-    const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/products?slug=eq.${encodeURIComponent(slug)}&is_active=eq.true&select=slug&limit=1`;
-    const res = await fetch(url, {
-      headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY! },
-    });
-    if (!res.ok) return true;
+    const url =
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/products` +
+      `?slug=eq.${encodeURIComponent(productSlug)}` +
+      `&select=is_active,categories(slug)` +
+      `&limit=1`;
+    const res = await fetch(url, { headers: { apikey: apiKey } });
+
+    // Network / Supabase error — fail open so a DB outage never blocks users.
+    if (!res.ok) return null;
+
     const data = await res.json();
-    return Array.isArray(data) && data.length > 0;
+
+    // Product genuinely not in the database — treat as inactive.
+    if (!Array.isArray(data) || data.length === 0) {
+      return { active: false, categorySlug: null };
+    }
+
+    const row = data[0];
+    return {
+      active: row.is_active === true,
+      categorySlug: row.categories?.slug ?? null,
+    };
   } catch {
-    return true;
+    // Any unexpected error — fail open.
+    return null;
   }
 }
 
@@ -47,12 +71,27 @@ export default withAuth(
     const { pathname } = request.nextUrl;
     const m = PRODUCT_RE.exec(pathname);
     if (m) {
-      const active = await isProductActive(m[1]);
-      if (!active) {
+      const [, urlCatSlug, productSlug] = m;
+      const info = await getProductInfo(productSlug);
+
+      // DB unreachable — fail open; let the page render its own 404.
+      if (info === null) return NextResponse.next();
+
+      // Product deleted / unpublished (or never existed).
+      if (!info.active) {
         return new NextResponse(NOT_FOUND_HTML, {
           status: 404,
           headers: { "content-type": "text/html; charset=utf-8" },
         });
+      }
+
+      // Product exists but is filed under a different category — 301 to canonical URL.
+      if (info.categorySlug && info.categorySlug !== urlCatSlug) {
+        const canonical = new URL(
+          `/category/${info.categorySlug}/${productSlug}`,
+          request.url,
+        );
+        return NextResponse.redirect(canonical, 301);
       }
     }
     return NextResponse.next();
@@ -66,7 +105,7 @@ export default withAuth(
       },
     },
     pages: { signIn: "/admin/login" },
-  }
+  },
 );
 
 export const config = {
@@ -74,8 +113,8 @@ export const config = {
     // Admin protection (unchanged)
     "/admin",
     "/admin/((?!login|forgot-password|reset-password).*)",
-    // Product pages — gate deleted/missing slugs before the page renders
-    // Use :path+ (one-or-more segments) since Next.js 14 may not support two named params
+    // Runs for all /category/… paths; PRODUCT_RE inside the handler restricts
+    // the DB check to exactly /category/<cat>/<product> (2 segments only).
     "/category/:path+",
   ],
 };
