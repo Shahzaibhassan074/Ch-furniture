@@ -32,10 +32,11 @@ type Props = {
   whatsapp: string;
   featuredCategories?: FeaturedCategory[];
   featuredProducts?: FeaturedProduct[];
+  initialQuery?: string;
 };
 
-export function SearchClient({ whatsapp, featuredCategories, featuredProducts }: Props) {
-  const [q,       setQ]       = useState("");
+export function SearchClient({ whatsapp, featuredCategories, featuredProducts, initialQuery = "" }: Props) {
+  const [q,       setQ]       = useState(initialQuery);
   const [results, setResults] = useState<FurnitureCardData[]>([]);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);

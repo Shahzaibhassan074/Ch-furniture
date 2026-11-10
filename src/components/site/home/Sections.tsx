@@ -22,7 +22,6 @@ import {
 } from "framer-motion";
 import { CHLogo } from "@/components/site/CHLogo";
 import { ArrowRight, Star, Plus, MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
-import { ProcessMobileCarousel } from "./ProcessMobileCarousel";
 import { Reveal } from "@/components/motion/Reveal";
 import { Counter } from "@/components/motion/Counter";
 
@@ -273,9 +272,6 @@ export function Process({ image }: { image?: string }) {
 
   return (
     <>
-      {/* Mobile-only swipe carousel (hidden on md+) */}
-      <ProcessMobileCarousel />
-
       {/* Desktop layout (hidden on mobile) */}
       <div ref={ref} className="hidden md:grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
         {/* Parallax image */}

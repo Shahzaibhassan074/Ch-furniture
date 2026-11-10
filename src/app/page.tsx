@@ -1,6 +1,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { SiteShell } from "@/components/site/SiteShell";
+import { MobileHome } from "@/components/mobile/pages/MobileHome";
 const HeroSlider = dynamic(
   () => import("@/components/site/home/HeroSlider").then((m) => ({ default: m.HeroSlider })),
   {
@@ -34,6 +35,7 @@ import {
 } from "@/lib/queries";
 import { getSettings } from "@/lib/settings";
 import { withRetry } from "@/lib/prisma";
+import { SITE_URL as SITE } from "@/lib/site";
 
 const CircularCategoryShowcase = dynamic(
   () =>
@@ -45,7 +47,6 @@ const CircularCategoryShowcase = dynamic(
 
 export const revalidate = 60;
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 const FAQ_LD = {
   "@context": "https://schema.org",
@@ -82,81 +83,96 @@ export default async function HomePage() {
   const totalPieces = categories.reduce((sum, c) => sum + (c.count ?? 0), 0);
 
   return (
-    <SiteShell>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }} />
+    <>
+      {/* desktop */}
+      <div className="hidden md:contents">
+        <SiteShell>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_LD) }} />
 
-      {/* ── Hero slider (H1 is the brand eyebrow inside HeroSlider) ── */}
-      <HeroSlider />
-      <MarqueeStrip />
+          {/* ── Hero slider (H1 is the brand eyebrow inside HeroSlider) ── */}
+          <HeroSlider />
+          <MarqueeStrip />
 
-      {/* ── Catalogue — circular orbit showcase ── */}
-      <CircularCategoryShowcase categories={categories} totalPieces={totalPieces} />
+          {/* ── Catalogue — circular orbit showcase ── */}
+          <CircularCategoryShowcase categories={categories} totalPieces={totalPieces} />
 
-      {/* ── Featured pieces — Best Sellers ── */}
-      {featured.length > 0 && (
-        <section className="bg-terra pt-8 pb-8 md:pt-24 md:pb-24">
-          <div className="container-px">
-            <FeaturedScroller
-              onDark
-              seeAllHref="/categories"
-              headerLeft={
-                <div>
-                  <p className="eyebrow" style={{ color: "#F5E642" }}>Best Sellers</p>
-                  <h2 className="mt-2 font-display text-[clamp(1.7rem,3.5vw,2.6rem)] font-bold text-white">
-                    Pieces worth the visit
-                  </h2>
-                </div>
-              }
-            >
-              {featured.map((f, i) => (
-                <FurnitureCardCompact key={f.slug} item={f} index={i} card />
-              ))}
-            </FeaturedScroller>
-          </div>
-        </section>
-      )}
+          {/* ── Featured pieces — Best Sellers ── */}
+          {featured.length > 0 && (
+            <section className="bg-terra pt-8 pb-8 md:pt-24 md:pb-24">
+              <div className="container-px">
+                <FeaturedScroller
+                  onDark
+                  seeAllHref="/categories"
+                  headerLeft={
+                    <div>
+                      <p className="eyebrow" style={{ color: "#F5E642" }}>Best Sellers</p>
+                      <h2 className="mt-2 font-display text-[clamp(1.7rem,3.5vw,2.6rem)] font-bold text-white">
+                        Pieces worth the visit
+                      </h2>
+                    </div>
+                  }
+                >
+                  {featured.map((f, i) => (
+                    <FurnitureCardCompact key={f.slug} item={f} index={i} card />
+                  ))}
+                </FeaturedScroller>
+              </div>
+            </section>
+          )}
 
-      {/* ── Process — why it takes time ── */}
-      <section className="container-px pt-8 md:pt-14 pb-20">
-        <Reveal>
-          <Process image={settings.processImageUrl || undefined} />
-        </Reveal>
-      </section>
+          {/* ── Process — why it takes time ── */}
+          <section className="container-px pt-8 md:pt-14 pb-20">
+            <Reveal>
+              <Process image={settings.processImageUrl || undefined} />
+            </Reveal>
+          </section>
 
-      {/* ── Testimonials ── */}
-      {testimonials.length > 0 && (
-        <section className="container-px pb-20">
-          <Reveal>
-            <SectionHeading
-              eyebrow="Kind words"
-              title="Trusted by homes and businesses."
-              accentWord="businesses."
-            />
-          </Reveal>
-          <div className="mt-10">
-            <Testimonials items={testimonials as import("@/components/site/home/Sections").TestimonialData[]} />
-          </div>
-        </section>
-      )}
+          {/* ── Testimonials ── */}
+          {testimonials.length > 0 && (
+            <section className="container-px pb-20">
+              <Reveal>
+                <SectionHeading
+                  eyebrow="Kind words"
+                  title="Trusted by homes and businesses."
+                  accentWord="businesses."
+                />
+              </Reveal>
+              <div className="mt-10">
+                <Testimonials items={testimonials as import("@/components/site/home/Sections").TestimonialData[]} />
+              </div>
+            </section>
+          )}
 
-      {/* ── FAQ ── */}
-      <section className="container-px pb-20">
-        <Reveal>
-          <SectionHeading eyebrow="Questions" title="Good to know." accentWord="Good" />
-        </Reveal>
-        <div className="mt-8">
-          <FAQ />
-        </div>
-      </section>
+          {/* ── FAQ ── */}
+          <section className="container-px pb-20">
+            <Reveal>
+              <SectionHeading eyebrow="Questions" title="Good to know." accentWord="Good" />
+            </Reveal>
+            <div className="mt-8">
+              <FAQ />
+            </div>
+          </section>
 
-      {/* ── Workshop Banner / CTA ── */}
-      <WorkshopBanner
-        whatsapp={settings.whatsapp}
-        workshopVideoDesktopUrl={settings.workshopVideoDesktopUrl || undefined}
-        workshopVideoDesktopPosterUrl={settings.workshopVideoDesktopPosterUrl || undefined}
-        workshopVideoMobileUrl={settings.workshopVideoMobileUrl || undefined}
-        workshopVideoMobilePosterUrl={settings.workshopVideoMobilePosterUrl || undefined}
-      />
-    </SiteShell>
+          {/* ── Workshop Banner / CTA ── */}
+          <WorkshopBanner
+            whatsapp={settings.whatsapp}
+            image={settings.processImageUrl || undefined}
+            workshopVideoDesktopUrl={settings.workshopVideoDesktopUrl || undefined}
+            workshopVideoDesktopPosterUrl={settings.workshopVideoDesktopPosterUrl || undefined}
+            workshopVideoMobileUrl={settings.workshopVideoMobileUrl || undefined}
+            workshopVideoMobilePosterUrl={settings.workshopVideoMobilePosterUrl || undefined}
+          />
+        </SiteShell>
+      </div>
+      {/* mobile */}
+      <div className="md:hidden">
+        <MobileHome
+          settings={settings}
+          categories={categories}
+          featured={featured}
+          testimonials={testimonials}
+        />
+      </div>
+    </>
   );
 }

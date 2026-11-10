@@ -7,11 +7,13 @@ import { HangingPhone } from "@/components/site/HangingPhone";
 import { MobileWorkshopBlock } from "@/components/site/MobileWorkshopBlock";
 import { Reveal } from "@/components/motion/Reveal";
 import { getSettings } from "@/lib/settings";
+import { getAllCategories } from "@/lib/queries";
 import { whatsappUrl } from "@/lib/utils";
+import { MobileContact } from "@/components/mobile/pages/MobileContact";
+import { SITE_URL as SITE } from "@/lib/site";
 
 export const revalidate = 60;
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
+
 
 export const metadata: Metadata = {
   title: "Contact & Workshop — Sialkot",
@@ -43,7 +45,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ContactPage() {
-  const s = await getSettings();
+  const [s, allCategories] = await Promise.all([getSettings(), getAllCategories()]);
   const mapSrc =
     s.mapEmbedUrl ||
     `https://www.google.com/maps?q=${encodeURIComponent(s.address)}&output=embed`;
@@ -78,21 +80,16 @@ export default async function ContactPage() {
   };
 
   return (
+    <>
+    {/* Mobile */}
+    <div className="md:hidden">
+      <MobileContact settings={s} categories={allCategories} />
+    </div>
+
+    {/* Desktop */}
+    <div className="hidden md:contents">
     <SiteShell>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBizLd) }} />
-
-      {/* Mobile workshop block — map + quick-action card */}
-      <div className="md:hidden">
-        <MobileWorkshopBlock
-          mapSrc={mapSrc}
-          address={s.address}
-          phone={s.phone}
-          whatsapp={s.whatsapp}
-          whatsappMessage={s.whatsappMessage}
-          businessHours={s.businessHours}
-          categoryThumbs={[]}
-        />
-      </div>
 
       <div className="container-px pt-28 pb-10 md:pt-32 relative overflow-visible">
         <HangingPhone />
@@ -201,5 +198,7 @@ export default async function ContactPage() {
         </div>
       </section>
     </SiteShell>
+    </div>
+    </>
   );
 }

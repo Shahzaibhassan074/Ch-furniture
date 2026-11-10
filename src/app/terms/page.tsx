@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { SiteShell } from "@/components/site/SiteShell";
+import { MobileGenericShell } from "@/components/mobile/MobileGenericShell";
 import { Breadcrumbs } from "@/components/site/Breadcrumbs";
+import { SITE_URL as SITE } from "@/lib/site";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
@@ -11,10 +12,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default function TermsPage() {
+function TermsContent() {
   return (
-    <SiteShell>
-      <div className="container-px py-16 md:py-24">
+    <div className="container-px py-16 md:py-24">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -103,6 +103,24 @@ export default function TermsPage() {
           </div>
         </div>
       </div>
-    </SiteShell>
+  );
+}
+
+export default function TermsPage() {
+  return (
+    <>
+      {/* desktop */}
+      <div className="hidden md:contents">
+        <SiteShell>
+          <TermsContent />
+        </SiteShell>
+      </div>
+      {/* mobile */}
+      <div className="md:hidden">
+        <MobileGenericShell>
+          <TermsContent />
+        </MobileGenericShell>
+      </div>
+    </>
   );
 }

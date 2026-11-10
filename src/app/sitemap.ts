@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 import { getAllSlugs } from "@/lib/queries";
+import { SITE_URL as SITE } from "@/lib/site";
 
 // Always read from the database — never serve a build-time cached sitemap.
 export const dynamic = "force-dynamic";
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://chfurniturehouse.com";
+
 
 const staticPriorities: Record<string, number> = {
   "":            1.0,
