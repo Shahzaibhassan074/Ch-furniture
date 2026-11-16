@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { MessageCircle, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
-import { whatsappUrl, cn } from "@/lib/utils";
+import { whatsappUrl, cn, productLink } from "@/lib/utils";
 
 export type FurnitureCardData = {
   slug:         string;
@@ -26,7 +26,8 @@ export function FurnitureCard({
   index?:    number;
 }) {
   const detailHref = `/category/${item.categorySlug}/${item.slug}`;
-  const waMessage  = `Hello CH Furniture House,\nI'm interested in the ${item.name}. Please send pricing, available wood options, and delivery information.`;
+  const waMessage  = `Hello CH Furniture House,\nI'm interested in the ${item.name}. Please send pricing, available wood options, and delivery information.
+${productLink(item.categorySlug, item.slug)}`;
 
   return (
     <motion.article

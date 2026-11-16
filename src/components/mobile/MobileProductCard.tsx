@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useFavourites } from "@/context/favourites-context";
+import { productLink } from "@/lib/utils";
 
 type Props = {
   slug: string;
@@ -28,7 +29,8 @@ export function MobileProductCard({
 
   const digits = whatsapp.replace(/\D/g, "");
   const waUrl = `https://wa.me/${digits}?text=${encodeURIComponent(
-    `Hello CH FURNITURE,\nI'm interested in the ${name} shown on your website. Please provide pricing, available wood options, delivery information, and customization options.`
+    `Hello CH FURNITURE,\nI'm interested in the ${name} shown on your website. Please provide pricing, available wood options, delivery information, and customization options.
+${productLink(categorySlug, slug)}`
   )}`;
   const productHref = `/category/${categorySlug}/${slug}`;
 

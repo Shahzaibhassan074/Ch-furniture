@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { MobileInnerLayout } from "@/components/mobile/MobileInnerLayout";
 import { useFavourites } from "@/context/favourites-context";
+import { productLink } from "@/lib/utils";
 
 type FurnitureItem = {
   slug: string;
@@ -65,7 +66,8 @@ function ProductCard({
   const saved = isFav(item.slug);
   const digits = whatsapp.replace(/\D/g, "");
   const waLink = `https://wa.me/${digits}?text=${encodeURIComponent(
-    `Hello CH FURNITURE,\nI'm interested in the ${item.name} shown on your website. Please provide pricing, available wood options, delivery information, and customization options.`
+    `Hello CH FURNITURE,\nI'm interested in the ${item.name} shown on your website. Please provide pricing, available wood options, delivery information, and customization options.
+${productLink(item.categorySlug, item.slug)}`
   )}`;
 
   return (
