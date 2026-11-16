@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { mPlayfair, mManrope } from "@/lib/mobile-fonts";
 import { FavouritesProvider, useFavourites } from "@/context/favourites-context";
 import "@/styles/mobile.css";
+import { productLink } from "@/lib/utils";
 
 type ProductImage = {
   id: string;
@@ -79,7 +80,8 @@ function MobileProductPageInner({ item, related, settings }: Props) {
   const [shareToast, setShareToast] = useState(false);
 
   const digits = settings.whatsapp.replace(/\D/g, "");
-  const waMessage = `Hello CH FURNITURE,\nI'm interested in the ${item.name}. Please send pricing, available wood options, delivery information and customization options.`;
+  const waMessage = `Hello CH FURNITURE,\nI'm interested in the ${item.name}. Please send pricing, available wood options, delivery information and customization options.
+${productLink(item.category?.slug, item.slug)}`;
   const waLink = `https://wa.me/${digits}?text=${encodeURIComponent(waMessage)}`;
   const callLink = `tel:${settings.phone.replace(/\s/g, "")}`;
 

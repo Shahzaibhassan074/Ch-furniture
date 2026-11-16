@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { MessageCircle, ArrowUpRight, Play } from "lucide-react";
 import { motion } from "framer-motion";
-import { whatsappUrl } from "@/lib/utils";
+import { whatsappUrl, productLink } from "@/lib/utils";
 
 export type VideoFurnitureCardData = {
   slug:           string;
@@ -29,7 +29,8 @@ export function VideoFurnitureCard({
   index?:   number;
 }) {
   const detailHref = `/category/${item.categorySlug}/${item.slug}`;
-  const waMessage  = `Hello CH Furniture House,\nI'm interested in the ${item.name}. Please send pricing, available wood options and customization options.`;
+  const waMessage  = `Hello CH Furniture House,\nI'm interested in the ${item.name}. Please send pricing, available wood options and customization options.
+${productLink(item.categorySlug, item.slug)}`;
   const videoRef   = useRef<HTMLVideoElement>(null);
   const [videoError, setVideoError] = useState(false);
   const hasVideo = !!item.videoUrl && !videoError;

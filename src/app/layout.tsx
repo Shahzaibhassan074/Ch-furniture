@@ -1,21 +1,25 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "sonner";
 import { getSettings } from "@/lib/settings";
 import { cleanSocialUrl } from "@/lib/utils";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+// Fonts are self-hosted (src/fonts, latin variable woff2 from Google Fonts, OFL).
+// next/font/google downloads them at build time, which kept failing on Vercel.
+const jakarta = localFont({
+  src: "../fonts/jakarta-latin.woff2",
+  weight: "400 800",
+  style: "normal",
   variable: "--font-jakarta",
   display: "swap",
 });
 
-const sans = Inter({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
+const sans = localFont({
+  src: "../fonts/inter-latin.woff2",
+  weight: "300 600",
+  style: "normal",
   variable: "--font-sans",
   display: "swap",
 });

@@ -108,7 +108,8 @@ export default async function ProductPage({ params }: { params: Params }) {
     ...item.videos.map((v) => ({ type: "video" as const, url: v.url, poster: v.posterUrl ?? undefined })),
   ];
 
-  const waMessage = `Hello CH Furniture House,\nI'm interested in the ${item.name}. Please send pricing, available wood options, delivery information and customization options.`;
+  const waMessage = `Hello CH Furniture House,\nI'm interested in the ${item.name}. Please send pricing, available wood options, delivery information and customization options.
+${SITE}/category/${item.category.slug}/${item.slug}`;
   const productUrl = `${SITE}/category/${item.category.slug}/${item.slug}`;
 
   const breadcrumbLd = {

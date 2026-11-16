@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { SITE_URL } from "@/lib/site";
 
 /** Merge Tailwind classes safely. */
 export function cn(...inputs: ClassValue[]) {
@@ -23,6 +24,15 @@ export function slugify(input: string): string {
 export function whatsappUrl(rawNumber: string, message: string): string {
   const number = rawNumber.replace(/\D/g, "");
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+}
+
+/**
+ * Full public URL of a product page. Added to WhatsApp messages so the
+ * shop sees exactly which design the customer means (WhatsApp shows the
+ * page's og:image as a preview card).
+ */
+export function productLink(categorySlug: string | null | undefined, slug: string): string {
+  return categorySlug ? `${SITE_URL}/category/${categorySlug}/${slug}` : `${SITE_URL}/search?q=${encodeURIComponent(slug)}`;
 }
 
 /** Parse a JSON string[] field stored in the DB; returns [] on failure. */

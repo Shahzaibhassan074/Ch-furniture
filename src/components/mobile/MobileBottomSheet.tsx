@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useFavourites } from "@/context/favourites-context";
+import { productLink } from "@/lib/utils";
 
 type Props = {
   type: "saved" | "quote";
@@ -231,7 +232,7 @@ export function MobileBottomSheet({ type, whatsapp, onClose }: Props) {
                 >
                   <a
                     href={`https://wa.me/${digits}?text=${encodeURIComponent(
-                      `Hello CH Furniture House,\nI'm interested in the following designs:\n${items.map((i) => `- ${i.name}`).join("\n")}\n\nCould you please provide pricing?`
+                      `Hello CH Furniture House,\nI'm interested in the following designs:\n${items.map((i) => `- ${i.name}\n  ${productLink(i.categorySlug, i.slug)}`).join("\n")}\n\nCould you please provide pricing?`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"

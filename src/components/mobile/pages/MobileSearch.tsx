@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { MobileInnerLayout } from "@/components/mobile/MobileInnerLayout";
+import { productLink } from "@/lib/utils";
 
 type Category = {
   slug: string;
@@ -375,7 +376,8 @@ export function MobileSearch({ settings, categories, initialQuery = "" }: Props)
           <div style={{ display: "flex", flexDirection: "column", padding: "6px 16px 0" }}>
             {results.map((r) => {
               const waLink = `https://wa.me/${digits}?text=${encodeURIComponent(
-                `Hello CH FURNITURE,\nI'm interested in the ${r.name} shown on your website. Please provide pricing and customization options.`
+                `Hello CH FURNITURE,\nI'm interested in the ${r.name} shown on your website. Please provide pricing and customization options.
+${productLink(r.categorySlug, r.slug)}`
               )}`;
               return (
                 <div
